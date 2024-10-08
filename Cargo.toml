@@ -1,0 +1,18 @@
+[package]
+name = "needs"
+description = "A simple tool to check if a command is available in the PATH"
+version = "0.1.0"
+edition = "2021"
+authors = ["Noah <noahbuergler@proton.me"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/NQMVD/needs"
+documentation = "https://docs.rs/needs"
+keywords = ["cli"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+atty = "0.2.14"
+clap = { version = "4.5.20", features = ["cargo"] }
+regex = "1.11.0"
+termcolor = "1.4.1"
+which = "6.0.3"
