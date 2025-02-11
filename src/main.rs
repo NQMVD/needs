@@ -67,10 +67,6 @@ fn main() {
     // Create a StandardStream for colored output
     let mut stdout = StandardStream::stdout(color_choice);
 
-    // Initialize counters
-    let mut ok = 0;
-    let mut ko = 0;
-
     // Regex for simple version extraction
     let regex_simple_version = Regex::new(r"(\d+\.?){2,3}").unwrap();
 
@@ -82,45 +78,31 @@ fn main() {
         // Check if command exists
         if which::which(command).is_err() {
             // Command not found
-            ko += 1;
-            if !matches.get_flag("quiet") {
+            if matches.get_flag("quiet") {
+                // already exit if in quiet mode
+                std::process::exit(1);
+            } else {
                 write_failure(&mut stdout, command);
+                continue;
             }
-            continue;
         }
 
         // Try to get the version
-        let (status, version) = get_command_version(command, &regex_simple_version);
+        let version = get_command_version(command, &regex_simple_version);
 
-        if status == -1 {
-            // Command not understood
-            ko += 1;
-            if !matches.get_flag("quiet") {
-                write_failure_not_understood(&mut stdout, command);
-            }
-        } else if status == 127 {
-            // Command not installed
-            ko += 1;
-            if !matches.get_flag("quiet") {
-                write_failure(&mut stdout, command);
-            }
-        } else if status == 0 || status == 141 {
-            // Successfully executed
-            ok += 1;
+        if version.is_some() {
+            // Command found and version found
             if !matches.get_flag("quiet") {
                 write_success(&mut stdout, command, version.as_deref());
             }
         } else {
-            // Command is there but we might not have been able to extract version
-            ok += 1;
+            // Command found but version not found
             if !matches.get_flag("quiet") {
-                write_success(&mut stdout, command, None);
+                write_failure(&mut stdout, command);
+                continue;
             }
         }
     }
-
-    // Exit with number of failed commands
-    std::process::exit(if ko > 126 { 126 } else { ko });
 }
 
 // Function to map aliases to actual command names
@@ -141,7 +123,7 @@ fn match_alias(cmd: &str) -> &str {
 }
 
 // Function to get command version
-fn get_command_version(command: &str, regex: &Regex) -> (i32, Option<String>) {
+fn get_command_version(command: &str, regex: &Regex) -> Option<String> {
     // Try common version flags
     let flags = ["--version", "-version", "-v", "-V", "version"];
     for flag in &flags {
@@ -152,12 +134,12 @@ fn get_command_version(command: &str, regex: &Regex) -> (i32, Option<String>) {
             let combined_output = stdout + &stderr;
             if let Some(caps) = regex.captures(&combined_output) {
                 let version = caps.get(0).map(|m| m.as_str().to_string());
-                return (0, version);
+                return version;
             }
         }
     }
     // If none of the flags worked, return status 0 without version
-    return (0, None);
+    return None;
 }
 
 // Functions to write success and failure messages
@@ -195,18 +177,4 @@ fn write_failure(stdout: &mut StandardStream, command: &str) {
     write!(stdout, "{}", cross).unwrap();
     stdout.reset().unwrap();
     writeln!(stdout, " {}", command).unwrap();
-}
-
-fn write_failure_not_understood(stdout: &mut StandardStream, command: &str) {
-    let cross = if atty::is(atty::Stream::Stdout) {
-        "✗"
-    } else {
-        "x"
-    };
-    stdout
-        .set_color(ColorSpec::new().set_fg(Some(Color::Red)).set_bold(true))
-        .unwrap();
-    write!(stdout, "{}", cross).unwrap();
-    stdout.reset().unwrap();
-    writeln!(stdout, " {} not understood", command).unwrap();
 }
