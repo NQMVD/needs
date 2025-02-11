@@ -28,13 +28,6 @@ fn main() {
                 .help("Silent mode"),
         )
         .arg(
-            Arg::new("safe")
-                .short('s')
-                .long("safe")
-                .action(ArgAction::SetTrue)
-                .help("Only check for known commands"),
-        )
-        .arg(
             Arg::new("color")
                 .long("color")
                 .default_value("auto")
@@ -71,8 +64,6 @@ fn main() {
     //     _ => ColorChoice::Auto,
     // };
 
-    let allow_unsafe = !matches.get_flag("safe");
-
     // Create a StandardStream for colored output
     let mut stdout = StandardStream::stdout(color_choice);
 
@@ -99,7 +90,7 @@ fn main() {
         }
 
         // Try to get the version
-        let (status, version) = get_command_version(command, &regex_simple_version, allow_unsafe);
+        let (status, version) = get_command_version(command, &regex_simple_version);
 
         if status == -1 {
             // Command not understood
@@ -150,78 +141,23 @@ fn match_alias(cmd: &str) -> &str {
 }
 
 // Function to get command version
-fn get_command_version(command: &str, regex: &Regex, allow_unsafe: bool) -> (i32, Option<String>) {
-    // Handle special cases similar to the Bash script
-    let output = match command {
-        // Commands that use '--version'
-        "bash" | "zsh" | "fish" | "git" | "hg" | "svn" | "bzr" | "curl" | "wget" | "http"
-        | "vim" | "emacs" | "nano" | "brew" | "sed" | "awk" | "grep" | "file" | "sudo" | "gzip"
-        | "xz" | "bzip2" | "tar" | "pv" | "docker" | "podman" | "psql" | "gcc" | "make"
-        | "cmake" | "g++" | "clang" | "ccache" | "ninja" | "rustc" | "cargo" | "aws" | "eb"
-        | "heroku" | "terraform" | "packer" | "vagrant" | "consul" | "nomad" | "unzip" | "pip"
-        | "pip3" | "node" | "npm" | "yarn" | "pnpm" | "sqlite3" | "just" => {
-            Command::new(command).arg("--version").output()
-        }
-        // Commands that use '-version'
-        "ant" | "java" | "javac" | "scala" | "kotlin" => {
-            Command::new(command).arg("-version").output()
-        }
-        // Commands that use '-v'
-        "unzip" | "screen" | "firefox" | "lua" | "luajit" => {
-            Command::new(command).arg("-v").output()
-        }
-        // Commands that use 'version' argument
-        "go" | "hugo" => Command::new(command).arg("version").output(),
-        // Commands with custom processing
-        "openssl" => {
-            let output = Command::new(command).arg("version").output();
-            if let Ok(output) = &output {
-                let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
-                let version = regex.find(&stdout).map(|m| m.as_str().to_string());
-                return (0, version);
-            }
-            output
-        }
-        // Fallback to dynamic detection if allowed
-        _ => {
-            if allow_unsafe {
-                // Try common version flags
-                let flags = ["--version", "-version", "-v", "-V", "version"];
-                for flag in &flags {
-                    let output = Command::new(command).arg(flag).output();
-                    if let Ok(output) = &output {
-                        let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
-                        let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
-                        let combined_output = stdout + &stderr;
-                        if let Some(caps) = regex.captures(&combined_output) {
-                            let version = caps.get(0).map(|m| m.as_str().to_string());
-                            return (0, version);
-                        }
-                    }
-                }
-                // If none of the flags worked, return status 0 without version
-                return (0, None);
-            } else {
-                // Command not understood
-                return (-1, None);
-            }
-        }
-    };
-
-    match output {
-        Ok(output) => {
+fn get_command_version(command: &str, regex: &Regex) -> (i32, Option<String>) {
+    // Try common version flags
+    let flags = ["--version", "-version", "-v", "-V", "version"];
+    for flag in &flags {
+        let output = Command::new(command).arg(flag).output();
+        if let Ok(output) = &output {
             let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
             let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
             let combined_output = stdout + &stderr;
             if let Some(caps) = regex.captures(&combined_output) {
                 let version = caps.get(0).map(|m| m.as_str().to_string());
-                (0, version)
-            } else {
-                (0, None)
+                return (0, version);
             }
         }
-        Err(_) => (127, None),
     }
+    // If none of the flags worked, return status 0 without version
+    return (0, None);
 }
 
 // Functions to write success and failure messages
