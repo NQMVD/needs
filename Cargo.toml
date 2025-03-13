@@ -16,3 +16,7 @@ clap = { version = "4.5.20", features = ["cargo"] }
 regex = "1.11.0"
 termcolor = "1.4.1"
 which = "6.0.3"
+
+[profile.dev]
+split-debuginfo = "unpacked"
+debug = 1
