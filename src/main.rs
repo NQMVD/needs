@@ -9,7 +9,7 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 fn main() {
     // Define command-line arguments using clap
-    let matches = CliCommand::new("has")
+    let matches = CliCommand::new("needs")
         .about(crate_description!())
         .version(crate_version!())
         .styles(
@@ -139,7 +139,7 @@ fn get_command_version(command: &str, regex: &Regex) -> Option<String> {
         }
     }
     // If none of the flags worked, return status 0 without version
-    return None;
+    None
 }
 
 // Functions to write success and failure messages
