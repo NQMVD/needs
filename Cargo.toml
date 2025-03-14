@@ -1,7 +1,7 @@
 [package]
 name = "needs"
-description = "A simple tool to check if a command is available in the PATH"
-version = "0.1.1"
+description = "Check if given bin(s) are available in the PATH"
+version = "0.2.0"
 edition = "2021"
 authors = ["Noah <noahbuergler@proton.me"]
 license = "GPL-3.0-or-later"
@@ -13,6 +13,7 @@ categories = ["command-line-utilities"]
 [dependencies]
 atty = "0.2.14"
 clap = { version = "4.5.20", features = ["cargo"] }
+rayon = "1.10.0"
 regex = "1.11.0"
 termcolor = "1.4.1"
 which = "6.0.3"
