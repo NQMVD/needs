@@ -8,3 +8,4 @@ TODO:
     - normal line wise
     - json
     - side-by-side boxes
+- add support for versions, min and exactly
