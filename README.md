@@ -23,8 +23,8 @@ needs eza bat rg gum lua python3 npm
 ## Output
 > using cli args
 
-![needs](screenshot.png)
+![needs](https://github.com/NQMVD/needs/blob/master/screenshot.png?raw=true)
 
 > using needsfile
 
-![needs](screenshot_file.png)
+![needs](https://github.com/NQMVD/needs/blob/master/screenshot_file.png?raw=true)
