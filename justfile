@@ -1,8 +1,8 @@
 _default:
     just --list
 
-test:
-    cargo b
-    ./target/debug/needs hx nu eza apfelkuchen
-    ./target/debug/needs -q hx nu eza
-    ./target/debug/needs -q hx nu eza apfelkuchen || echo "failed as expected"
+@bench:
+    # hyperfine 'needs' -N --warmup 50
+    # hyperfine 'needs --no-version' -N --warmup 50
+    # hyperfine 'needs --quiet' -N --warmup 50 -i
+    hyperfine 'needs' 'needs --no-version' 'needs --quiet' -N --warmup 50 -i

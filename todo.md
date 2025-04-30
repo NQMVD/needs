@@ -1,11 +1,17 @@
 TODO:
 - use clap derive
+- add option to disable version checking
 - multi-threading
     - use rayon to iterate in parallel
     - mostly for working with bins installed via nix
     - at some point, add a check using whichs path if the bin is installed via nix to warn the user
 - add more output formats
     - normal line wise
+    - line wise but with right align for names and left align for versions (like cargo info)
     - json
     - side-by-side boxes
 - add support for versions, min and exactly
+- add support for java version
+    - openjdk 24 2025-03-18
+- auto detect if run via the terminal or from inside a script
+    - look at bat for that
