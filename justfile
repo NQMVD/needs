@@ -1,6 +1,9 @@
 _default:
     just --list
 
+@install:
+    cargo install --path .
+
 @bench:
     # hyperfine 'needs' -N --warmup 50
     # hyperfine 'needs --no-version' -N --warmup 50

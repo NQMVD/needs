@@ -1,9 +1,9 @@
-use std::io::Write;
+use anyhow::{bail, ensure, Result};
+use std::io::{Stdout, Write};
 use std::time::Instant;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use tracing::{debug, info, Level};
 use tracing_subscriber::FmtSubscriber;
-use anyhow::{bail, ensure, Result};
 use xshell::{cmd, Shell};
 
 use clap::Parser;
@@ -25,17 +25,15 @@ fn run_command_with_version(binary_name: &str) -> Option<String> {
 
     for flag in &version_flags {
         let sh = Shell::new().unwrap(); // yep, we run these in separated shells
-        let command = cmd!(sh, "{binary_name}")
-            .ignore_stderr()
-            .arg(flag);
+        let command = cmd!(sh, "{binary_name}").ignore_stderr().arg(flag);
         debug!("Running command: {:?}", command);
 
         match command.read() {
             Ok(output) => return Some(output),
             Err(_) => {
                 debug!(binary_name = binary_name, flag = flag, "flag didn't work");
-                continue
-            },
+                continue;
+            }
         };
     }
     None
@@ -63,12 +61,9 @@ fn get_binary_names() -> Result<Vec<Binary>> {
 
     match cli.bins {
         Some(bins) => {
-            let binaries = bins.iter().map(
-                |name| {
-                Binary {
-                    name: name.clone(),
-                    version: "?".into()
-                }
+            let binaries = bins.iter().map(|name| Binary {
+                name: name.clone(),
+                version: "?".into(),
             });
             Ok(binaries.collect::<Vec<Binary>>())
         }
@@ -77,20 +72,17 @@ fn get_binary_names() -> Result<Vec<Binary>> {
 
             for path in file_paths {
                 let names = match std::fs::read_to_string(path) {
-                    Ok(content) => {
-                        content
-                            .split_whitespace()
-                            .map(|s| s.to_owned())
-                            .collect::<Vec<String>>()
-                    }
+                    Ok(content) => content
+                        .split_whitespace()
+                        .map(|s| s.to_owned())
+                        .collect::<Vec<String>>(),
                     Err(..) => bail!("Failed to read file: {}", path),
                 };
 
                 ensure!(!names.is_empty(), "needsfile empty.");
-                let binaries = names.iter().map(|name| {
-                    Binary {
-                        name: name.clone(), version: "?".into()
-                    }
+                let binaries = names.iter().map(|name| Binary {
+                    name: name.clone(),
+                    version: "?".into(),
                 });
                 return Ok(binaries.collect::<Vec<Binary>>());
             }
@@ -101,10 +93,7 @@ fn get_binary_names() -> Result<Vec<Binary>> {
 }
 
 fn sort_binaries(binaries: &mut Vec<Binary>) {
-    binaries
-        .sort_by(
-            |a, b| a.name.cmp(&b.name)
-        )
+    binaries.sort_by(|a, b| a.name.cmp(&b.name))
 }
 
 fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
@@ -122,13 +111,13 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
                         name: binary.name.clone(),
                         version,
                     }
-                },
+                }
                 None => {
                     debug!(binary_name = name, "No version found for binary");
-                    debug!(ms = now.elapsed().as_millis() , "Took");
+                    debug!(ms = now.elapsed().as_millis(), "Took");
                     Binary {
                         name: binary.name.clone(),
-                        version: "?".into()
+                        version: "?".into(),
                     }
                 }
             }
@@ -137,6 +126,27 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
     bins_with_versions
 }
 
+fn print_center_aligned(
+    binaries: Vec<Binary>,
+    max_len: usize,
+    mut stdout: &mut StandardStream,
+    color_spec: &ColorSpec,
+    no_versions: bool,
+) -> Result<()> {
+    for bin in &binaries {
+        stdout.set_color(&color_spec)?;
+        let padding_needed = max_len - bin.name.len();
+        let padding = " ".repeat(padding_needed);
+        write!(&mut stdout, "{}{}", padding, bin.name)?;
+        stdout.reset()?;
+        if no_versions {
+            writeln!(&mut stdout, " found")?;
+        } else {
+            writeln!(&mut stdout, " {}", bin.version)?;
+        }
+    }
+    Ok(())
+}
 
 pub const CLAP_STYLING: clap::builder::styling::Styles = clap::builder::styling::Styles::styled()
     .header(clap_cargo::style::HEADER)
@@ -172,30 +182,26 @@ fn main() -> Result<()> {
     } else {
         Level::ERROR
     };
-    let subscriber = FmtSubscriber::builder()
-        .with_max_level(log_level)
-        .finish();
+    let subscriber = FmtSubscriber::builder().with_max_level(log_level).finish();
 
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("setting default subscriber failed");
-
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     let cli = Cli::parse();
 
     let binaries = get_binary_names()?;
     ensure!(!binaries.is_empty(), "binary sources are empty");
+    let max_name_len = binaries.iter().map(|bin| bin.name.len()).max().unwrap_or(0);
 
     let mut available: Vec<Binary> = Vec::new();
     let mut not_available: Vec<Binary> = Vec::new();
 
-    binaries.iter()
-        .for_each(|binary| {
-            if which::which(binary.name.clone().as_str()).is_ok() {
-                available.push(binary.clone());
-            } else {
-                not_available.push(binary.clone());
-            }
-        });
+    binaries.iter().for_each(|binary| {
+        if which::which(binary.name.clone().as_str()).is_ok() {
+            available.push(binary.clone());
+        } else {
+            not_available.push(binary.clone());
+        }
+    });
 
     sort_binaries(&mut available);
     sort_binaries(&mut not_available);
@@ -214,31 +220,25 @@ fn main() -> Result<()> {
 
     if cli.no_versions {
         color_spec.set_fg(Some(Color::Green)).set_bold(true);
-        for bin in available {
-            stdout.set_color(&color_spec)?;
-            write!(&mut stdout, "{}", bin.name)?;
-            stdout.reset()?;
-            writeln!(&mut stdout, " found")?;
-        }
+        print_center_aligned(available, max_name_len, &mut stdout, &color_spec, true)?;
     } else {
         let mut bins_with_versions = get_versions(available);
         sort_binaries(&mut bins_with_versions);
-
         color_spec.set_fg(Some(Color::Green)).set_bold(true);
-        for binary in bins_with_versions {
+        print_center_aligned(bins_with_versions, max_name_len, &mut stdout, &color_spec, false)?;
+    }
+
+    if !not_available.is_empty() {
+        let padding = " ".repeat(max_name_len - 1);
+        writeln!(&mut stdout, "{}---", padding)?;
+
+        color_spec.set_fg(Some(Color::Red)).set_bold(true);
+        for binary in not_available {
             stdout.set_color(&color_spec)?;
             write!(&mut stdout, "{}", binary.name)?;
             stdout.reset()?;
-            writeln!(&mut stdout, " {}", binary.version)?;
+            writeln!(&mut stdout, " not found")?;
         }
-    }
-
-    color_spec.set_fg(Some(Color::Red)).set_bold(true);
-    for binary in not_available {
-        stdout.set_color(&color_spec)?;
-        write!(&mut stdout, "{}", binary.name)?;
-        stdout.reset()?;
-        writeln!(&mut stdout, " not found")?;
     }
 
     Ok(())
