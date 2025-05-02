@@ -167,7 +167,7 @@ struct Cli {
     /// List of binaries to check
     bins: Option<Vec<String>>,
 
-    /// only return with 0 or 1 exit code
+    /// stay quiet, exit with 0 or 1
     #[clap(short, long)]
     quiet: bool,
 
@@ -208,7 +208,6 @@ fn main() -> Result<()> {
 
     if cli.quiet {
         if !not_available.is_empty() {
-            // info!("quiet exit, missing: {}", not_available.join(", "));
             std::process::exit(1);
         }
         info!("quiet exit");
@@ -225,13 +224,21 @@ fn main() -> Result<()> {
         let mut bins_with_versions = get_versions(available);
         sort_binaries(&mut bins_with_versions);
         color_spec.set_fg(Some(Color::Green)).set_bold(true);
-        print_center_aligned(bins_with_versions, max_name_len, &mut stdout, &color_spec, false)?;
+        print_center_aligned(
+            bins_with_versions,
+            max_name_len,
+            &mut stdout,
+            &color_spec,
+            false,
+        )?;
+    }
+
+    if !available.is_empty() && !not_available.is_empty() {
+        let padding = " ".repeat(max_name_len - 1);
+        writeln!(&mut stdout, "{}---", padding)?;
     }
 
     if !not_available.is_empty() {
-        let padding = " ".repeat(max_name_len - 1);
-        writeln!(&mut stdout, "{}---", padding)?;
-
         color_spec.set_fg(Some(Color::Red)).set_bold(true);
         for binary in not_available {
             stdout.set_color(&color_spec)?;
