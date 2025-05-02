@@ -1,5 +1,5 @@
 use anyhow::{bail, ensure, Result};
-use std::io::{Stdout, Write};
+use std::io::Write;
 use std::time::Instant;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use tracing::{debug, info, Level};
@@ -216,6 +216,7 @@ fn main() -> Result<()> {
 
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let mut color_spec = ColorSpec::new();
+    let needs_separator = !available.is_empty() && !not_available.is_empty();
 
     if cli.no_versions {
         color_spec.set_fg(Some(Color::Green)).set_bold(true);
@@ -233,7 +234,7 @@ fn main() -> Result<()> {
         )?;
     }
 
-    if !available.is_empty() && !not_available.is_empty() {
+    if needs_separator {
         let padding = " ".repeat(max_name_len - 1);
         writeln!(&mut stdout, "{}---", padding)?;
     }
