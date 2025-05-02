@@ -1,104 +1,151 @@
-use std::collections::HashMap;
-use std::io::Write;
-use std::process::Command;
+use anyhow::{bail, ensure, Result};
+use std::io::{Stdout, Write};
+use std::time::Instant;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
-use which::which;
+use tracing::{debug, info, Level};
+use tracing_subscriber::FmtSubscriber;
+use xshell::{cmd, Shell};
 
 use clap::Parser;
 use rayon::prelude::*;
+use regex::Regex;
+// TODO: custom error types for all cases
 
-struct VersionInfo {
+#[derive(Clone, Debug)]
+struct Binary {
+    name: String,
     version: String,
-    binary_name: String,
 }
 
-fn try_version_command(bin_name: &str) -> Option<std::process::Output> {
-    // Try different version flags
-    let version_flags = ["--version", "-version", "-V", "version", "--ver", "-v"];
+// TODO: impl join for binary names
+
+fn run_command_with_version(binary_name: &str) -> Option<String> {
+    // TODO: log the frequency of these
+    let version_flags = ["--version", "-v", "-version", "-V"];
 
     for flag in &version_flags {
-        match Command::new(bin_name).arg(flag).output() {
-            Ok(output) if output.status.success() => {
-                return Some(output);
+        let sh = Shell::new().unwrap(); // yep, we run these in separated shells
+        let command = cmd!(sh, "{binary_name}").ignore_stderr().arg(flag);
+        debug!("Running command: {:?}", command);
+
+        match command.read() {
+            Ok(output) => return Some(output),
+            Err(_) => {
+                debug!(binary_name = binary_name, flag = flag, "flag didn't work");
+                continue;
             }
-            _ => continue,
-        }
+        };
     }
-
-    // Try with no flags as a last resort
-    match Command::new(bin_name).output() {
-        Ok(output) if output.status.success() => Some(output),
-        _ => None,
-    }
+    None
 }
 
-fn extract_version(output: std::process::Output) -> String {
-    let output_str = String::from_utf8_lossy(&output.stdout);
-    let re = regex::Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap();
+fn extract_version(output: String) -> String {
+    let re = Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap();
 
-    let mut version = String::new();
-    for line in output_str.lines() {
-        if let Some(cap) = re.captures(line) {
-            version = cap[1].to_string();
-            break;
+    for line in output.lines() {
+        if let Some(captures) = re.captures(line) {
+            for i in 0..captures.len() {
+                if let Some(m) = captures.get(i) {
+                    debug!("capture[{}]: {}", i, m.as_str());
+                }
+            }
+            return captures[1].to_string();
         }
     }
-    version
+    info!("couldn't extract version from this: {}", output);
+    "?".into()
 }
 
-fn get_binaries() -> Result<Vec<String>, Box<dyn std::error::Error>> {
+fn get_binary_names() -> Result<Vec<Binary>> {
     let cli = Cli::parse();
 
-    if let Some(bins) = cli.bins {
-        Ok(bins)
-    } else {
-        let file_paths = ["needsfile", ".needsfile", "needs", ".needs"];
-        for path in file_paths {
-            if let Ok(content) = std::fs::read_to_string(path) {
-                let bins: Vec<String> = content.split_whitespace().map(|s| s.to_owned()).collect();
-                if !bins.is_empty() {
-                    return Ok(bins);
-                }
-            }
+    match cli.bins {
+        Some(bins) => {
+            let binaries = bins.iter().map(|name| Binary {
+                name: name.clone(),
+                version: "?".into(),
+            });
+            Ok(binaries.collect::<Vec<Binary>>())
         }
+        None => {
+            let file_paths = ["needsfile", ".needsfile", "needs", ".needs"];
 
-        Err("No binaries specified and no needsfile found.".into())
+            for path in file_paths {
+                let names = match std::fs::read_to_string(path) {
+                    Ok(content) => content
+                        .split_whitespace()
+                        .map(|s| s.to_owned())
+                        .collect::<Vec<String>>(),
+                    Err(..) => bail!("Failed to read file: {}", path),
+                };
+
+                ensure!(!names.is_empty(), "needsfile empty.");
+                let binaries = names.iter().map(|name| Binary {
+                    name: name.clone(),
+                    version: "?".into(),
+                });
+                return Ok(binaries.collect::<Vec<Binary>>());
+            }
+
+            bail!("No binaries specified and no needsfile found.");
+        }
     }
 }
 
-fn get_versions(available: Vec<&str>) -> HashMap<String, String> {
-    let bins_with_versions: Vec<VersionInfo> = available
+fn sort_binaries(binaries: &mut Vec<Binary>) {
+    binaries.sort_by(|a, b| a.name.cmp(&b.name))
+}
+
+fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
+    let bins_with_versions = binaries
         .par_iter()
-        .map(|binary_name| {
-            let output = match try_version_command(binary_name) {
-                Some(out) => out,
-                None => {
-                    println!("{}: Failed to get version information", binary_name);
-                    return VersionInfo {
-                        version: "?".into(),
-                        binary_name: binary_name.to_string(),
-                    };
+        .map(|binary| {
+            let now = Instant::now();
+            let name = &*binary.name; // IS THIS IT???
+
+            match run_command_with_version(name) {
+                Some(output) => {
+                    let version = extract_version(output);
+                    debug!(ms = now.elapsed().as_millis(), binary_name = name, "Took");
+                    Binary {
+                        name: binary.name.clone(),
+                        version,
+                    }
                 }
-            };
-
-            let version = extract_version(output);
-
-            VersionInfo {
-                version: if version.is_empty() {
-                    "unknown".into()
-                } else {
-                    version
-                },
-                binary_name: binary_name.to_string(),
+                None => {
+                    debug!(binary_name = name, "No version found for binary");
+                    debug!(ms = now.elapsed().as_millis(), "Took");
+                    Binary {
+                        name: binary.name.clone(),
+                        version: "?".into(),
+                    }
+                }
             }
         })
         .collect();
+    bins_with_versions
+}
 
-    let mut version_map = HashMap::new();
-    for bin in bins_with_versions {
-        version_map.insert(bin.binary_name, bin.version);
+fn print_center_aligned(
+    binaries: Vec<Binary>,
+    max_len: usize,
+    mut stdout: &mut StandardStream,
+    color_spec: &ColorSpec,
+    no_versions: bool,
+) -> Result<()> {
+    for bin in &binaries {
+        stdout.set_color(&color_spec)?;
+        let padding_needed = max_len - bin.name.len();
+        let padding = " ".repeat(padding_needed);
+        write!(&mut stdout, "{}{}", padding, bin.name)?;
+        stdout.reset()?;
+        if no_versions {
+            writeln!(&mut stdout, " found")?;
+        } else {
+            writeln!(&mut stdout, " {}", bin.version)?;
+        }
     }
-    version_map
+    Ok(())
 }
 
 pub const CLAP_STYLING: clap::builder::styling::Styles = clap::builder::styling::Styles::styled()
@@ -123,57 +170,75 @@ struct Cli {
     /// only return with 0 or 1 exit code
     #[clap(short, long)]
     quiet: bool,
+
+    /// don't check for versions
+    #[clap(short, long)]
+    no_versions: bool,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let quiet = Cli::parse().quiet;
-
-    let binaries = match get_binaries() {
-        Ok(it) => it,
-        Err(err) => {
-            eprintln!("Run `needs --help` for more information.");
-            return Err(err);
-        }
+fn main() -> Result<()> {
+    let log_level = if cfg!(debug_assertions) {
+        Level::DEBUG
+    } else {
+        Level::ERROR
     };
-    let binary_names: Vec<&str> = binaries.iter().map(|s| s.as_str()).collect();
+    let subscriber = FmtSubscriber::builder().with_max_level(log_level).finish();
 
-    let (available, not_available): (Vec<&str>, Vec<&str>) = binary_names
-        .par_iter()
-        .partition(|binary_name| which(binary_name).is_ok());
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
-    if quiet {
+    let cli = Cli::parse();
+
+    let binaries = get_binary_names()?;
+    ensure!(!binaries.is_empty(), "binary sources are empty");
+    let max_name_len = binaries.iter().map(|bin| bin.name.len()).max().unwrap_or(0);
+
+    let mut available: Vec<Binary> = Vec::new();
+    let mut not_available: Vec<Binary> = Vec::new();
+
+    binaries.iter().for_each(|binary| {
+        if which::which(binary.name.clone().as_str()).is_ok() {
+            available.push(binary.clone());
+        } else {
+            not_available.push(binary.clone());
+        }
+    });
+
+    sort_binaries(&mut available);
+    sort_binaries(&mut not_available);
+
+    if cli.quiet {
         if !not_available.is_empty() {
+            // info!("quiet exit, missing: {}", not_available.join(", "));
             std::process::exit(1);
         }
+        info!("quiet exit");
         std::process::exit(0);
-    }
-
-    let bins_with_versions = get_versions(available);
-
-    let mut sorted_bins_with_versions: Vec<(String, String)> = Vec::new();
-    for binary_name in &binary_names {
-        if let Some(version) = bins_with_versions.get(*binary_name) {
-            sorted_bins_with_versions.push((binary_name.to_string(), version.clone()));
-        }
     }
 
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let mut color_spec = ColorSpec::new();
 
-    color_spec.set_fg(Some(Color::Green)).set_bold(true);
-    for (bin, version) in sorted_bins_with_versions {
-        stdout.set_color(&color_spec)?;
-        write!(&mut stdout, "{}", bin)?;
-        stdout.reset()?;
-        writeln!(&mut stdout, " {}", version)?;
+    if cli.no_versions {
+        color_spec.set_fg(Some(Color::Green)).set_bold(true);
+        print_center_aligned(available, max_name_len, &mut stdout, &color_spec, true)?;
+    } else {
+        let mut bins_with_versions = get_versions(available);
+        sort_binaries(&mut bins_with_versions);
+        color_spec.set_fg(Some(Color::Green)).set_bold(true);
+        print_center_aligned(bins_with_versions, max_name_len, &mut stdout, &color_spec, false)?;
     }
 
-    color_spec.set_fg(Some(Color::Red)).set_bold(true);
-    for bin in not_available {
-        stdout.set_color(&color_spec)?;
-        write!(&mut stdout, "{}", bin)?;
-        stdout.reset()?;
-        writeln!(&mut stdout, " not found")?;
+    if !not_available.is_empty() {
+        let padding = " ".repeat(max_name_len - 1);
+        writeln!(&mut stdout, "{}---", padding)?;
+
+        color_spec.set_fg(Some(Color::Red)).set_bold(true);
+        for binary in not_available {
+            stdout.set_color(&color_spec)?;
+            write!(&mut stdout, "{}", binary.name)?;
+            stdout.reset()?;
+            writeln!(&mut stdout, " not found")?;
+        }
     }
 
     Ok(())
