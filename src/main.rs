@@ -1,10 +1,9 @@
 use anyhow::{bail, ensure, Result};
-use std::io::Write;
 use std::time::Instant;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use tracing::{debug, info, Level};
 use tracing_subscriber::FmtSubscriber;
 use xshell::{cmd, Shell};
+use colored::Colorize;
 
 use clap::Parser;
 use rayon::prelude::*;
@@ -129,21 +128,12 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
 fn print_center_aligned(
     binaries: Vec<Binary>,
     max_len: usize,
-    mut stdout: &mut StandardStream,
-    color_spec: &ColorSpec,
     no_versions: bool,
 ) -> Result<()> {
     for bin in &binaries {
-        stdout.set_color(&color_spec)?;
         let padding_needed = max_len - bin.name.len();
         let padding = " ".repeat(padding_needed);
-        write!(&mut stdout, "{}{}", padding, bin.name)?;
-        stdout.reset()?;
-        if no_versions {
-            writeln!(&mut stdout, " found")?;
-        } else {
-            writeln!(&mut stdout, " {}", bin.version)?;
-        }
+        println!("{}{} {}", padding, bin.name.bright_green(), if no_versions { "found" } else { &bin.version });
     }
     Ok(())
 }
@@ -214,38 +204,28 @@ fn main() -> Result<()> {
         std::process::exit(0);
     }
 
-    let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    let mut color_spec = ColorSpec::new();
     let needs_separator = !available.is_empty() && !not_available.is_empty();
 
     if cli.no_versions {
-        color_spec.set_fg(Some(Color::Green)).set_bold(true);
-        print_center_aligned(available, max_name_len, &mut stdout, &color_spec, true)?;
+        print_center_aligned(available, max_name_len, true)?;
     } else {
         let mut bins_with_versions = get_versions(available);
         sort_binaries(&mut bins_with_versions);
-        color_spec.set_fg(Some(Color::Green)).set_bold(true);
         print_center_aligned(
             bins_with_versions,
             max_name_len,
-            &mut stdout,
-            &color_spec,
             false,
         )?;
     }
 
     if needs_separator {
         let padding = " ".repeat(max_name_len - 1);
-        writeln!(&mut stdout, "{}---", padding)?;
+        println!("{}---", padding);
     }
 
     if !not_available.is_empty() {
-        color_spec.set_fg(Some(Color::Red)).set_bold(true);
         for binary in not_available {
-            stdout.set_color(&color_spec)?;
-            write!(&mut stdout, "{}", binary.name)?;
-            stdout.reset()?;
-            writeln!(&mut stdout, " not found")?;
+            println!("{} not found", binary.name.bright_red());
         }
     }
 

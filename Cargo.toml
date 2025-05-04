@@ -21,6 +21,7 @@ tracing = "0.1"
 tracing-subscriber = "0.3.0"
 anyhow = "1.0.98"
 xshell = "0.2.7"
+colored = "3.0.0"
 
 [profile.dev]
 split-debuginfo = "unpacked"
