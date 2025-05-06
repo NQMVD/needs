@@ -15,3 +15,5 @@ TODO:
     - openjdk 24 2025-03-18
 - auto detect if run via the terminal or from inside a script
     - look at bat for that
+- add support for reading files directly
+    - global cargo.toml for example

@@ -1,36 +1,53 @@
 use anyhow::{bail, ensure, Result};
+use beef::Cow;
+use colored::Colorize;
 use std::time::Instant;
 use tracing::{debug, info, Level};
 use tracing_subscriber::FmtSubscriber;
 use xshell::{cmd, Shell};
-use colored::Colorize;
 
 use clap::Parser;
 use rayon::prelude::*;
 use regex::Regex;
 // TODO: custom error types for all cases
 
-#[derive(Clone, Debug)]
-struct Binary {
-    name: String,
-    version: String,
+#[derive(Debug)]
+struct Binary<'a> {
+    name: Cow<'a, str>,
+    version: Cow<'a, str>,
+}
+
+impl<'a> Binary<'a> {
+    fn new(name: Cow<'a, str>, version: Cow<'a, str>) -> Self {
+        Self { name, version }
+    }
+}
+
+impl<'a> Default for Binary<'a> {
+    fn default() -> Self {
+        Self {
+            name: Cow::borrowed(""),
+            version: Cow::borrowed("?"),
+        }
+    }
 }
 
 // TODO: impl join for binary names
 
-fn run_command_with_version(binary_name: &str) -> Option<String> {
+fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
     // TODO: log the frequency of these
     let version_flags = ["--version", "-v", "-version", "-V"];
 
     for flag in &version_flags {
         let sh = Shell::new().unwrap(); // yep, we run these in separated shells
-        let command = cmd!(sh, "{binary_name}").ignore_stderr().arg(flag);
+        let name = binary_name;
+        let command = cmd!(sh, "{name}").ignore_stderr().arg(flag);
         debug!("Running command: {:?}", command);
 
         match command.read() {
-            Ok(output) => return Some(output),
+            Ok(output) => return Some(Cow::owned(output)),
             Err(_) => {
-                debug!(binary_name = binary_name, flag = flag, "flag didn't work");
+                // debug!(binary_name = binary_name, flag = flag, "flag didn't work");
                 continue;
             }
         };
@@ -38,7 +55,7 @@ fn run_command_with_version(binary_name: &str) -> Option<String> {
     None
 }
 
-fn extract_version(output: String) -> String {
+fn extract_version(output: Cow<str>) -> String {
     let re = Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap();
 
     for line in output.lines() {
@@ -55,16 +72,18 @@ fn extract_version(output: String) -> String {
     "?".into()
 }
 
-fn get_binary_names() -> Result<Vec<Binary>> {
+fn get_binary_names<'a>() -> Result<Vec<Binary<'a>>> {
     let cli = Cli::parse();
 
     match cli.bins {
         Some(bins) => {
-            let binaries = bins.iter().map(|name| Binary {
-                name: name.clone(),
-                version: "?".into(),
-            });
-            Ok(binaries.collect::<Vec<Binary>>())
+            let binaries: Vec<Binary> = bins
+                .iter()
+                .map(|name| {
+                    Binary::new(Cow::owned(name.to_string()), Cow::owned(String::from("?")))
+                })
+                .collect::<Vec<Binary>>();
+            Ok(binaries)
         }
         None => {
             let file_paths = ["needsfile", ".needsfile", "needs", ".needs"];
@@ -79,11 +98,13 @@ fn get_binary_names() -> Result<Vec<Binary>> {
                 };
 
                 ensure!(!names.is_empty(), "needsfile empty.");
-                let binaries = names.iter().map(|name| Binary {
-                    name: name.clone(),
-                    version: "?".into(),
-                });
-                return Ok(binaries.collect::<Vec<Binary>>());
+                let binaries = names
+                    .iter()
+                    .map(|name| {
+                        Binary::new(Cow::owned(name.to_string()), Cow::owned(String::from("?")))
+                    })
+                    .collect::<Vec<Binary>>();
+                return Ok(binaries);
             }
 
             bail!("No binaries specified and no needsfile found.");
@@ -100,24 +121,18 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
         .par_iter()
         .map(|binary| {
             let now = Instant::now();
-            let name = &*binary.name; // IS THIS IT???
+            let name = binary.name.clone().into_owned();
 
-            match run_command_with_version(name) {
+            match run_command_with_version(name.as_str()) {
                 Some(output) => {
                     let version = extract_version(output);
-                    debug!(ms = now.elapsed().as_millis(), binary_name = name, "Took");
-                    Binary {
-                        name: binary.name.clone(),
-                        version,
-                    }
+                    // debug!(ms = now.elapsed().as_millis(), binary_name = name, "Took");
+                    Binary::new(Cow::owned(name.to_string()), Cow::owned(version))
                 }
                 None => {
-                    debug!(binary_name = name, "No version found for binary");
+                    // debug!(binary_name = name, "No version found for binary");
                     debug!(ms = now.elapsed().as_millis(), "Took");
-                    Binary {
-                        name: binary.name.clone(),
-                        version: "?".into(),
-                    }
+                    Binary::new(Cow::owned(name.to_string()), Cow::owned("?".into()))
                 }
             }
         })
@@ -125,15 +140,16 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
     bins_with_versions
 }
 
-fn print_center_aligned(
-    binaries: Vec<Binary>,
-    max_len: usize,
-    no_versions: bool,
-) -> Result<()> {
+fn print_center_aligned(binaries: Vec<Binary>, max_len: usize, no_versions: bool) -> Result<()> {
     for bin in &binaries {
         let padding_needed = max_len - bin.name.len();
         let padding = " ".repeat(padding_needed);
-        println!("{}{} {}", padding, bin.name.bright_green(), if no_versions { "found" } else { &bin.version });
+        println!(
+            "{}{} {}",
+            padding,
+            bin.name.bright_green(),
+            if no_versions { "found" } else { &bin.version }
+        );
     }
     Ok(())
 }
@@ -185,13 +201,14 @@ fn main() -> Result<()> {
     let mut available: Vec<Binary> = Vec::new();
     let mut not_available: Vec<Binary> = Vec::new();
 
-    binaries.iter().for_each(|binary| {
-        if which::which(binary.name.clone().as_str()).is_ok() {
-            available.push(binary.clone());
+    for binary in binaries {
+        let name = binary.name.as_ref();
+        if which::which(name).is_ok() {
+            available.push(binary);
         } else {
-            not_available.push(binary.clone());
+            not_available.push(binary);
         }
-    });
+    }
 
     sort_binaries(&mut available);
     sort_binaries(&mut not_available);
@@ -211,11 +228,7 @@ fn main() -> Result<()> {
     } else {
         let mut bins_with_versions = get_versions(available);
         sort_binaries(&mut bins_with_versions);
-        print_center_aligned(
-            bins_with_versions,
-            max_name_len,
-            false,
-        )?;
+        print_center_aligned(bins_with_versions, max_name_len, false)?;
     }
 
     if needs_separator {
