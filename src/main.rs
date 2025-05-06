@@ -72,10 +72,8 @@ fn extract_version(output: Cow<str>) -> String {
     "?".into()
 }
 
-fn get_binary_names<'a>() -> Result<Vec<Binary<'a>>> {
-    let cli = Cli::parse();
-
-    match cli.bins {
+fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
+    match cli.bins.clone() {
         Some(bins) => {
             let binaries: Vec<Binary> = bins
                 .iter()
@@ -194,7 +192,7 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    let binaries = get_binary_names()?;
+    let binaries = get_binary_names(&cli)?;
     ensure!(!binaries.is_empty(), "binary sources are empty");
     let max_name_len = binaries.iter().map(|bin| bin.name.len()).max().unwrap_or(0);
 
@@ -243,4 +241,52 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_version() {
+        let output = "v1.2.3\n";
+        let version = extract_version(Cow::borrowed(output));
+        assert_eq!(version, "1.2.3");
+
+        let output = "v100.200.300\n";
+        let version = extract_version(Cow::borrowed(output));
+        assert_eq!(version, "100.200.300");
+
+        let output = "v1.2.3-nightly\n";
+        let version = extract_version(Cow::borrowed(output));
+        assert_eq!(version, "1.2.3-n");
+    }
+
+    #[test]
+    fn test_extract_version_no_match() {
+        let output = "no version found\n";
+        let version = extract_version(Cow::borrowed(output));
+        assert_eq!(version, "?");
+    }
+
+    #[test]
+    fn test_get_binary_names() {
+        let args = vec!["PLACEHOLDER", "bat", "btm", "needs", "apfelkuchen"];
+        let cli = Cli::parse_from(args);
+        let binaries = get_binary_names(&cli).unwrap();
+        assert_eq!(binaries.len(), 4);
+        assert_eq!(binaries[0].name, Cow::borrowed("bat"));
+        assert_eq!(binaries[1].name, Cow::borrowed("btm"));
+        assert_eq!(binaries[2].name, Cow::borrowed("needs"));
+        assert_eq!(binaries[3].name, Cow::borrowed("apfelkuchen"));
+    }
+
+    #[test]
+    fn test_run_command_with_version() {
+        let binary_name = "bat";
+        let version = run_command_with_version(binary_name);
+        println!("Version: {:?}", version);
+        assert!(version.is_some());
+        assert!(version.unwrap().contains("bat"));
+    }
 }
