@@ -121,9 +121,9 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
         .par_iter()
         .map(|binary| {
             let now = Instant::now();
-            let name = binary.name.clone().into_owned();
+            let name = &binary.name;
 
-            match run_command_with_version(name.as_str()) {
+            match run_command_with_version(name) {
                 Some(output) => {
                     let version = extract_version(output);
                     // debug!(ms = now.elapsed().as_millis(), binary_name = name, "Took");
