@@ -1,3 +1,4 @@
+#![allow(clippy::never_loop)] // because of the files that can vary depending on the system
 use anyhow::{bail, ensure, Result};
 use beef::Cow;
 use colored::Colorize;
@@ -23,7 +24,7 @@ impl<'a> Binary<'a> {
     }
 }
 
-impl<'a> Default for Binary<'a> {
+impl Default for Binary<'_> {
     fn default() -> Self {
         Self {
             name: Cow::borrowed(""),
