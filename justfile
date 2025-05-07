@@ -7,14 +7,14 @@ release_build := "./target/release/needs"
 @build:
     cargo build --release &> /dev/null
 
-@build_no_version:
-    cargo build --release --no-default-features  &> /dev/null
+@build_no_versions:
+    cargo build --release --no-default-features &> /dev/null
 
 @bench: build
     hyperfine '{{ release_build }}' '{{ release_build }} --no-version' '{{ release_build }} --quiet' \
         -N --warmup 50 -M 500 -i --export-markdown report.md
 
-@bench_no_version: build_no_version
+@bench_no_versions: build_no_versions
     hyperfine '{{ release_build }}' '{{ release_build }} --quiet' \
         -N --warmup 50 -M 500 -i --export-markdown report.md
 
