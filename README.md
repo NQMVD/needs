@@ -29,6 +29,10 @@ needs -q <bin>...
 cargo install needs
 ```
 
+> [!NOTE]
+> Target Platforms are UNIX based systems and Windows support is _not_ planned.
+> Because `needs` uses the `which` and `xshell` crates, it might run on Windows anyways.
+
 ## Disclaimer & Insights on calling binaries
 ### potential modifications
 > [!IMPORTANT]
