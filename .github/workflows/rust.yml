@@ -3,9 +3,12 @@ name: Package and Publish
 on:
   push:
     branches:
-    - main
-    - release/*
+      - main
+      - release/*
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   publish:

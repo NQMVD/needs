@@ -1,8 +1,8 @@
-_default:
-    just --list
-
 debug_build := "./target/debug/needs"
 release_build := "./target/release/needs"
+
+@_default:
+    just --list
 
 @build:
     cargo build --release &> /dev/null
@@ -20,3 +20,9 @@ release_build := "./target/release/needs"
 
 @install:
     cargo install --path .
+
+@install_no_versions:
+    cargo install --path . --no-default-features
+
+@install_from_cratesio:
+    cargo install needs
