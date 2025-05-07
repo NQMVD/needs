@@ -248,6 +248,7 @@ dependencies = [
  "clap",
  "clap-cargo",
  "colored",
+ "once_cell",
  "rayon",
  "regex",
  "termcolor",

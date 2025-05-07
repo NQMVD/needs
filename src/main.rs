@@ -2,6 +2,7 @@
 use anyhow::{bail, ensure, Result};
 use beef::Cow;
 use colored::Colorize;
+use once_cell::sync::Lazy;
 use std::time::Instant;
 use tracing::{debug, info, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -40,7 +41,15 @@ fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
     let version_flags = ["--version", "-v", "-version", "-V"];
 
     for flag in &version_flags {
-        let sh = Shell::new().unwrap(); // yep, we run these in separated shells
+        let sh = {
+            match Shell::new() {
+                Ok(t) => t,
+                Err(e) => {
+                    debug!("Error creating shell: {}", e);
+                    return None;
+                }
+            }
+        }; // yep, we run these in separated shells
         let name = binary_name;
         let command = cmd!(sh, "{name}").ignore_stderr().arg(flag);
         debug!("Running command: {:?}", command);
@@ -57,10 +66,13 @@ fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
 }
 
 fn extract_version(output: Cow<str>) -> String {
-    let re = Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap();
+    static VERSION_RE: Lazy<Regex> = // Make it static and use Lazy
+        Lazy::new(|| Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap()); // unwrap is fine here as the regex is static and tested
 
     for line in output.lines() {
-        if let Some(captures) = re.captures(line) {
+        if let Some(captures) = VERSION_RE.captures(line) {
+            // Use VERSION_RE
+
             for i in 0..captures.len() {
                 if let Some(m) = captures.get(i) {
                     debug!("capture[{}]: {}", i, m.as_str());
@@ -78,9 +90,7 @@ fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
         Some(bins) => {
             let binaries: Vec<Binary> = bins
                 .iter()
-                .map(|name| {
-                    Binary::new(Cow::owned(name.to_string()), Cow::owned(String::from("?")))
-                })
+                .map(|name| Binary::new(Cow::owned(name.clone()), Cow::borrowed("?")))
                 .collect::<Vec<Binary>>();
             Ok(binaries)
         }
@@ -99,9 +109,7 @@ fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
                 ensure!(!names.is_empty(), "needsfile empty.");
                 let binaries = names
                     .iter()
-                    .map(|name| {
-                        Binary::new(Cow::owned(name.to_string()), Cow::owned(String::from("?")))
-                    })
+                    .map(|name| Binary::new(Cow::owned(name.to_string()), Cow::borrowed("?")))
                     .collect::<Vec<Binary>>();
                 return Ok(binaries);
             }
@@ -122,16 +130,16 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
             let now = Instant::now();
             let name = &binary.name;
 
-            match run_command_with_version(name) {
+            match run_command_with_version(name.as_ref()) {
                 Some(output) => {
                     let version = extract_version(output);
                     // debug!(ms = now.elapsed().as_millis(), binary_name = name, "Took");
-                    Binary::new(Cow::owned(name.to_string()), Cow::owned(version))
+                    Binary::new(name.clone(), Cow::owned(version))
                 }
                 None => {
                     // debug!(binary_name = name, "No version found for binary");
                     debug!(ms = now.elapsed().as_millis(), "Took");
-                    Binary::new(Cow::owned(name.to_string()), Cow::owned("?".into()))
+                    Binary::new(name.clone(), Cow::borrowed("?"))
                 }
             }
         })
@@ -197,17 +205,7 @@ fn main() -> Result<()> {
     ensure!(!binaries.is_empty(), "binary sources are empty");
     let max_name_len = binaries.iter().map(|bin| bin.name.len()).max().unwrap_or(0);
 
-    let mut available: Vec<Binary> = Vec::new();
-    let mut not_available: Vec<Binary> = Vec::new();
-
-    for binary in binaries {
-        let name = binary.name.as_ref();
-        if which::which(name).is_ok() {
-            available.push(binary);
-        } else {
-            not_available.push(binary);
-        }
-    }
+    let (mut available, mut not_available) = partition_binaries(binaries);
 
     sort_binaries(&mut available);
     sort_binaries(&mut not_available);
@@ -242,6 +240,21 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn partition_binaries(binaries: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, Vec<Binary<'_>>) {
+    let mut available: Vec<Binary> = Vec::new();
+    let mut not_available: Vec<Binary> = Vec::new();
+
+    for binary in binaries {
+        let name = binary.name.as_ref();
+        if which::which(name).is_ok() {
+            available.push(binary);
+        } else {
+            not_available.push(binary);
+        }
+    }
+    (available, not_available)
 }
 
 #[cfg(test)]
