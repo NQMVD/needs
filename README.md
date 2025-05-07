@@ -24,6 +24,9 @@ needs <bin>...
 needs -q <bin>...
 ```
 
+### help:
+![needs_help](https://github.com/NQMVD/needs/blob/master/needs_help.png?raw=true)
+
 ## Installation
 ```bash
 cargo install needs

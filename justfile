@@ -26,3 +26,6 @@ release_build := "./target/release/needs"
 
 @install_from_cratesio:
     cargo install needs
+
+@freeze_help:
+    freeze -c full -x 'needs --help' -o needs_help.png
