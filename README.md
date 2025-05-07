@@ -3,6 +3,15 @@
 
 *...multi-threaded of course.*
 
+## Screenshots
+> using cli args
+
+![needs](https://github.com/NQMVD/needs/blob/master/screenshot.png?raw=true)
+
+> using needsfile
+
+![needs](https://github.com/NQMVD/needs/blob/master/screenshot_file.png?raw=true)
+
 ## Usage
 ```bash
 needs <bin>...
@@ -14,20 +23,6 @@ needs <bin>...
 # returns 0 if all bins are available, 1 otherwise
 needs -q <bin>...
 ```
-
-## Example
-```bash
-needs eza bat rg gum lua python3 npm
-```
-
-## Output
-> using cli args
-
-![needs](https://github.com/NQMVD/needs/blob/master/screenshot.png?raw=true)
-
-> using needsfile
-
-![needs](https://github.com/NQMVD/needs/blob/master/screenshot_file.png?raw=true)
 
 ## Installation
 ```bash
