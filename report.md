@@ -1,5 +1,5 @@
 | Command | Mean [ms] | Min [ms] | Max [ms] | Relative |
 |:---|---:|---:|---:|---:|
-| `needs` | 5.0 ± 0.1 | 4.8 | 5.5 | 2.92 ± 0.16 |
-| `needs --no-version` | 1.7 ± 0.1 | 1.4 | 1.9 | 1.00 |
-| `needs --quiet` | 1.8 ± 0.1 | 1.5 | 2.7 | 1.03 ± 0.07 |
+| `./target/release/needs` | 4.9 ± 0.3 | 4.6 | 8.9 | 3.61 ± 0.22 |
+| `./target/release/needs --no-version` | 1.4 ± 0.0 | 1.3 | 1.6 | 1.00 |
+| `./target/release/needs --quiet` | 1.4 ± 0.1 | 1.3 | 2.1 | 1.06 ± 0.05 |
