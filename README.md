@@ -3,6 +3,15 @@
 
 *...multi-threaded of course.*
 
+## Screenshots
+> using cli args
+
+![needs](https://github.com/NQMVD/needs/blob/master/screenshot.png?raw=true)
+
+> using needsfile
+
+![needs](https://github.com/NQMVD/needs/blob/master/screenshot_file.png?raw=true)
+
 ## Usage
 ```bash
 needs <bin>...
@@ -15,16 +24,39 @@ needs <bin>...
 needs -q <bin>...
 ```
 
-## Example
+## Installation
 ```bash
-needs eza bat rg gum lua python3 npm
+cargo install needs
 ```
 
-## Output
-> using cli args
+## Disclaimer & Insights on calling binaries
+### potential modifications
+> [!IMPORTANT]
+> Keep in mind that needs runs the programs you give it.
+> (if it's told to retrieve versions that is...)
 
-![needs](https://github.com/NQMVD/needs/blob/master/screenshot.png?raw=true)
+This has been tested and shown good results, but there's always one that doesn't work with any conventions or just a really old program.
+In such cases the program doesn't return a version that needs can read, but instead goes off to do it's thing and potentionally ends up making modifications to your filesystem (e.g. deleting files for whatever-reason, we don't know yet).
 
-> using needsfile
+If you happen to run into one, there's basically nothing I can do for you.
+_Still,_ I would like to try or just hear about it so i can inlude it in a list to prevent future incidents.
 
-![needs](https://github.com/NQMVD/needs/blob/master/screenshot_file.png?raw=true)
+### potential latency
+The program is inspired by the `has` bash program. Therefore I also wanted it to have the version retrieval feature.
+For now that process relies on the individual binaries getting called with the --version flag,
+which can be _extremely_ slow in some cases (the `mintlify` program for example takes almost an **entire second** to respond).
+Thanks to `par_iter` from rayon it's possible to run all commands in parallel tho, which helps at least a little bit.
+
+For the future I want to improve the multithreading part by introducing a **timeout** for the threads.
+Those that take to long to answer will be terminated after the timeout and the affected binaries will only be marked as found, without a version.
+
+But even with those improvements some might only want to check if the program is installed.
+Therefore I not only added a flag `--no-versions` but also made it a cargo feature which can be disabled with `--no-default-features` when installing.
+
+Also planned is a feature that includes a list of known
+- long running,
+- uncomplying or old
+binaries which will _not_ be called to retrieve their version.
+
+To identify long running binaries, you can use the verbose flag to increase the logging level, which when reached DEBUG (-vvv) shows the timings for the individual binaries.
+If you also find poorly optimized programs, just create an issue so i can keep track of them, but you could also just notify the developer and tell him to stop using javascript for big terminal tools :)
