@@ -31,6 +31,10 @@ needs -q <bin>...
 ```bash
 cargo install needs
 ```
+or
+```bash
+cargo binstall -y needs
+```
 
 > [!NOTE]
 > Target Platforms are UNIX based systems and Windows support is _not_ planned.
@@ -67,3 +71,8 @@ binaries which will _not_ be called to retrieve their version.
 
 To identify long running binaries, you can use the verbose flag to increase the logging level, which when reached DEBUG (-vvv) shows the timings for the individual binaries.
 If you also find poorly optimized programs, just create an issue so i can keep track of them, but you could also just notify the developer and tell him to stop using javascript for big terminal tools :)
+
+## speed
+As before mentioned, the speed of the program depends on the called binaries if run with version retrieval.
+The speed of the program itself is actually quite fast, see the `report.md` for the results of a benchmark.
+The benchmark was done with the `hyperfine` program, run on a M4 Macbook Pro.
