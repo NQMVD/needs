@@ -4,6 +4,9 @@ release_build := "./target/release/needs"
 @_default:
     just --list
 
+@testlog:
+    cargo r -- -vvvv
+
 @build:
     cargo build --release &> /dev/null
 
