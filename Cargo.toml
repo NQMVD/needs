@@ -1,8 +1,8 @@
 [package]
 name = "needs"
 description = "Check if given bin(s) are available in the PATH"
-version = "0.4.0"
-edition = "2021"
+version = "0.4.1"
+edition = "2024"
 authors = ["Noah <noahbuergler@proton.me>"]
 license = "GPL-3.0-or-later"
 repository = "https://github.com/NQMVD/needs"
@@ -13,11 +13,11 @@ categories = ["command-line-utilities"]
 [features]
 default = ["version-retrieval"]
 version-retrieval = [
-    "dep:rayon",
-    "dep:regex",
-    "dep:xshell",
-    "dep:once_cell",
-    "clap/suggestions",
+  "dep:rayon",
+  "dep:regex",
+  "dep:xshell",
+  "dep:once_cell",
+  "clap/suggestions",
 ]
 
 [dependencies]
@@ -25,8 +25,6 @@ clap = { version = "4.5.20", features = ["cargo", "derive"] }
 clap-cargo = "0.15.2"
 termcolor = "1.4.1"
 which = "7.0.3"
-tracing = "0.1"
-tracing-subscriber = "0.3.0"
 anyhow = "1.0.98"
 colored = "3.0.0"
 beef = "0.5.2"

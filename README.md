@@ -6,11 +6,11 @@
 ## Screenshots
 > using cli args
 
-![needs](https://github.com/NQMVD/needs/blob/master/screenshot.png?raw=true)
+![needs](https://github.com/NQMVD/needs/blob/master/images/screenshot.png?raw=true)
 
 > using needsfile
 
-![needs](https://github.com/NQMVD/needs/blob/master/screenshot_file.png?raw=true)
+![needs](https://github.com/NQMVD/needs/blob/master/images/screenshot_file.png?raw=true)
 
 ## Usage
 ```bash
@@ -25,7 +25,7 @@ needs -q <bin>...
 ```
 
 ### help:
-![needs_help](https://github.com/NQMVD/needs/blob/master/needs_help.png?raw=true)
+![needs_help](https://github.com/NQMVD/needs/blob/master/images/needs_help.png?raw=true)
 
 ## Installation
 ```bash
