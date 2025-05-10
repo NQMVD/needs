@@ -1,5 +1,5 @@
 #![allow(clippy::never_loop)] // because of the files that can vary depending on the system
-use anyhow::{bail, ensure, Result};
+use anyhow::{Result, bail, ensure};
 use beef::Cow;
 use chrono::Local;
 use clap::Parser;
@@ -15,7 +15,7 @@ use rayon::prelude::*;
 #[cfg(feature = "version-retrieval")]
 use regex::Regex;
 #[cfg(feature = "version-retrieval")]
-use xshell::{cmd, Shell};
+use xshell::{Shell, cmd};
 
 // TODO: custom error types for all cases
 
@@ -83,6 +83,7 @@ fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
       }
     };
   }
+  debug!(bin = binary_name; "no version found");
   None
 }
 
@@ -99,13 +100,10 @@ fn extract_version(output: Cow<str>) -> String {
     Lazy::new(|| Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap());
 
   let mut version_to_return: String = "?".into();
-  // let mut deferred_debug_messages: Vec<String> = Vec::new();
-  // let mut processed_lines: Vec<String> = Vec::new();
   let mut version_successfully_extracted = false;
   let lines = output.lines().collect::<Vec<_>>();
 
   for line in &lines {
-    // deferred_debug_messages.push(format!("line: {}", line));
     if let Some(captures) = VERSION_REGEX.captures(line) {
       if let Some(m) = captures.get(1) {
         version_to_return = m.as_str().to_string();
@@ -169,7 +167,9 @@ fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
           debug!(path = path; "Failed to read or find needsfile, trying next.");
         }
       }
-      bail!("No binaries specified and no non-empty needsfile (needsfile, .needsfile, needs, .needs) found.");
+      bail!(
+        "No binaries specified and no non-empty needsfile (needsfile, .needsfile, needs, .needs) found."
+      );
     }
   }
 }
@@ -186,13 +186,12 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
       let now = Instant::now();
       match run_command_with_version(binary.name.as_ref()) {
         Some(output) => {
-          let version = extract_version(output);
           debug!(
               bin = binary.name.as_ref(),
               ms = now.elapsed().as_millis();
               "calling binary took"
           );
-          Binary::new(binary.name, Cow::owned(version))
+          Binary::new(binary.name, Cow::owned(extract_version(output)))
         }
         None => {
           debug!(
