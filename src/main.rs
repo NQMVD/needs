@@ -40,8 +40,6 @@ impl Default for Binary<'_> {
   }
 }
 
-// TODO: impl join for binary names
-
 fn partition_binaries(binaries_to_check: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, Vec<Binary<'_>>) {
   let mut available: Vec<Binary> = Vec::new();
   let mut not_available: Vec<Binary> = Vec::new();
@@ -49,8 +47,10 @@ fn partition_binaries(binaries_to_check: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, V
   for binary in binaries_to_check {
     let name = binary.name.as_ref();
     if which::which(name).is_ok() {
+      debug!(bin = name; "found");
       available.push(binary);
     } else {
+      debug!(bin = name; "not found");
       not_available.push(binary);
     }
   }
@@ -94,13 +94,10 @@ fn run_command_with_version<'a>(_binary_name: &str) -> Option<Cow<'a, str>> {
 
 #[cfg(feature = "version-retrieval")]
 fn extract_version(output: Cow<str>) -> String {
-  use log::warn;
-
   static VERSION_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap());
 
   let mut version_to_return: String = "?".into();
-  let mut version_successfully_extracted = false;
   let lines = output.lines().collect::<Vec<_>>();
 
   for line in &lines {
@@ -114,13 +111,8 @@ fn extract_version(output: Cow<str>) -> String {
           .join("\n");
         debug!(captures = formatted_captures.as_str(), line = line; "version found");
       }
-      version_successfully_extracted = true;
       break;
     }
-  }
-
-  if !version_successfully_extracted {
-    warn!(output = lines.join("\n").as_str(); "couldn't extract version from this:");
   }
 
   version_to_return // Return the extracted version or "?" at the end
@@ -191,6 +183,8 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
               ms = now.elapsed().as_millis();
               "calling binary took"
           );
+          debug!(
+            bin = binary.name.as_ref(), output = output.as_ref(); "command output");
           Binary::new(binary.name, Cow::owned(extract_version(output)))
         }
         None => {
@@ -223,39 +217,6 @@ fn print_center_aligned(binaries: Vec<Binary>, max_len: usize, always_found: boo
     println!("{}{} {}", padding, bin.name.bright_green(), version_display);
   }
   Ok(())
-}
-
-pub const CLAP_STYLING: clap::builder::styling::Styles = clap::builder::styling::Styles::styled()
-  .header(clap_cargo::style::HEADER)
-  .usage(clap_cargo::style::USAGE)
-  .literal(clap_cargo::style::LITERAL)
-  .placeholder(clap_cargo::style::PLACEHOLDER)
-  .error(clap_cargo::style::ERROR)
-  .valid(clap_cargo::style::VALID)
-  .invalid(clap_cargo::style::INVALID);
-
-#[derive(Parser)]
-#[command(version, about, long_about)]
-#[command(styles = CLAP_STYLING)]
-/// Check if given bin(s) are available in the PATH
-///
-/// If no binaries are specified, it will look for a file named `needsfile` or `.needsfile` in the current directory.
-struct Cli {
-  /// List of binaries to check
-  bins: Option<Vec<String>>,
-
-  /// stay quiet, exit with 0 or 1
-  #[clap(short, long)]
-  quiet: bool,
-
-  /// Verbosity level (can be repeated, e.g. -vvv)
-  #[clap(short, long, action = clap::ArgAction::Count)]
-  verbosity: u8,
-
-  #[cfg(feature = "version-retrieval")]
-  /// don't check for versions
-  #[clap(short, long)]
-  no_versions: bool,
 }
 
 struct Collect<'kvs>(BTreeMap<Key<'kvs>, Value<'kvs>>);
@@ -352,6 +313,39 @@ fn setup_logger(verbosity: u8) -> Result<(), fern::InitError> {
     .chain(std::io::stdout())
     .apply()?;
   Ok(())
+}
+
+pub const CLAP_STYLING: clap::builder::styling::Styles = clap::builder::styling::Styles::styled()
+  .header(clap_cargo::style::HEADER)
+  .usage(clap_cargo::style::USAGE)
+  .literal(clap_cargo::style::LITERAL)
+  .placeholder(clap_cargo::style::PLACEHOLDER)
+  .error(clap_cargo::style::ERROR)
+  .valid(clap_cargo::style::VALID)
+  .invalid(clap_cargo::style::INVALID);
+
+#[derive(Parser)]
+#[command(version, about, long_about)]
+#[command(styles = CLAP_STYLING)]
+/// Check if given bin(s) are available in the PATH
+///
+/// If no binaries are specified, it will look for a file named `needsfile` or `.needsfile` in the current directory.
+struct Cli {
+  /// List of binaries to check
+  bins: Option<Vec<String>>,
+
+  /// stay quiet, exit with 0 or 1
+  #[clap(short, long)]
+  quiet: bool,
+
+  /// Verbosity level (can be repeated, e.g. -vvv)
+  #[clap(short, long, action = clap::ArgAction::Count)]
+  verbosity: u8,
+
+  #[cfg(feature = "version-retrieval")]
+  /// don't check for versions
+  #[clap(short, long)]
+  no_versions: bool,
 }
 
 fn main() -> Result<()> {

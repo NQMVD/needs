@@ -30,7 +30,7 @@ release_build := "./target/release/needs"
 @install_from_cratesio:
     cargo install needs
 
-@freeze_all: freeze_latest freeze_no_versions freeze_help freeze_log
+@freeze_all: install freeze_latest freeze_no_versions freeze_help freeze_log
     echo "All images have been generated."
 
 @freeze_help:
@@ -43,4 +43,4 @@ release_build := "./target/release/needs"
     freeze -c full -x "needs --no-versions" -o "images/needs_no_versions.png"
 
 @freeze_log:
-    freeze -c full -x "needs -vvvv" -o "images/needs_log.png"
+    freeze -c full -x "needs -vvv" -o "images/needs_log.png"
