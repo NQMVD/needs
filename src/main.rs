@@ -4,12 +4,8 @@ use beef::Cow;
 use chrono::Local;
 use clap::Parser;
 use colored::Colorize;
-use fern::colors::{Color, ColoredLevelConfig};
-use log::{
-  debug, info,
-  kv::{self, Key, Value, VisitSource},
-  trace, LevelFilter,
-};
+use log::kv::*;
+use log::*;
 use std::{collections::BTreeMap, time::Instant};
 
 #[cfg(feature = "version-retrieval")]
@@ -255,7 +251,7 @@ struct Cli {
 
   /// Verbosity level (can be repeated, e.g. -vvv)
   #[clap(short, long, action = clap::ArgAction::Count)]
-  verbose: u8,
+  verbosity: u8,
 
   #[cfg(feature = "version-retrieval")]
   /// don't check for versions
@@ -281,35 +277,26 @@ fn setup_logger(verbosity: u8) -> Result<(), fern::InitError> {
     _ => LevelFilter::Trace,
   };
 
-  let colors = ColoredLevelConfig::new()
-    .trace(Color::TrueColor {
-      r: 144,
-      g: 144,
-      b: 144,
-    })
-    .debug(Color::TrueColor {
-      r: 95,
-      g: 96,
-      b: 255,
-    })
-    .info(Color::TrueColor {
-      r: 99,
-      g: 254,
-      b: 218,
-    })
-    .warn(Color::TrueColor {
-      r: 219,
-      g: 254,
-      b: 143,
-    })
-    .error(Color::TrueColor {
-      r: 254,
-      g: 95,
-      b: 136,
-    });
+  // Gum log colors
+  const TRACE_RGB: (u8, u8, u8) = (144, 144, 144);
+  const DEBUG_RGB: (u8, u8, u8) = (95, 96, 255);
+  const INFO_RGB: (u8, u8, u8) = (99, 254, 218);
+  const WARN_RGB: (u8, u8, u8) = (219, 254, 143);
+  const ERROR_RGB: (u8, u8, u8) = (254, 95, 136);
 
   fern::Dispatch::new()
     .format(move |out, message, record| {
+      let time = Local::now().format("%H:%M");
+      let lvl_plain = format!("{:>5}", record.level());
+      let (r, g, b) = match record.level() {
+        Level::Trace => TRACE_RGB,
+        Level::Debug => DEBUG_RGB,
+        Level::Info => INFO_RGB,
+        Level::Warn => WARN_RGB,
+        Level::Error => ERROR_RGB,
+      };
+      let lvl_colored = lvl_plain.truecolor(r, g, b);
+
       let has_kvs = record.key_values().count() > 0;
       if has_kvs {
         let mut visitor = Collect(BTreeMap::new());
@@ -351,26 +338,15 @@ fn setup_logger(verbosity: u8) -> Result<(), fern::InitError> {
 
         if multiline.is_empty() {
           out.finish(format_args!(
-            "{} {} {message} {}",
-            Local::now().format("%H:%M"),
-            colors.color(record.level()),
-            formatted_pairs,
+            "{time} {lvl_colored} {message} {formatted_pairs}"
           ))
         } else {
           out.finish(format_args!(
-            "{} {} {message} {}\n  {}",
-            Local::now().format("%H:%M"),
-            colors.color(record.level()),
-            formatted_pairs,
-            formatted_multiline_pairs
+            "{time} {lvl_colored} {message} {formatted_pairs}\n  {formatted_multiline_pairs}"
           ))
         }
       } else {
-        out.finish(format_args!(
-          "{} {} {message}",
-          Local::now().format("%H:%M"),
-          colors.color(record.level())
-        ))
+        out.finish(format_args!("{time} {lvl_colored} {message}"))
       }
     })
     .level(log_level)
@@ -382,7 +358,7 @@ fn setup_logger(verbosity: u8) -> Result<(), fern::InitError> {
 fn main() -> Result<()> {
   let cli = Cli::parse();
 
-  setup_logger(cli.verbose).expect("Failed to set up logger");
+  setup_logger(cli.verbosity).expect("Failed to set up logger");
 
   let binaries_from_source = get_binary_names(&cli)?;
   ensure!(!binaries_from_source.is_empty(), "binary sources are empty");
@@ -496,7 +472,7 @@ mod tests {
     Cli {
       bins,
       quiet: false,
-      verbose: 0,
+      verbosity: 0,
       #[cfg(feature = "version-retrieval")]
       no_versions: no_versions_flag,
     }
