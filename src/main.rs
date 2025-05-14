@@ -424,6 +424,7 @@ fn sort_binaries(binaries: &mut Vec<Binary>) {
   binaries.sort_by(|a, b| a.name.cmp(&b.name))
 }
 
+#[cfg(feature = "version-retrieval")]
 fn print_center_aligned(
   binaries: Vec<Binary>,
   max_len: usize,
@@ -442,6 +443,16 @@ fn print_center_aligned(
       }
     };
     println!("{}{} {}", padding, bin.name.green(), version_display);
+  }
+  Ok(())
+}
+
+#[cfg(not(feature = "version-retrieval"))]
+fn print_center_aligned(binaries: Vec<Binary>, max_len: usize) -> Result<()> {
+  for bin in &binaries {
+    let padding_needed = max_len.saturating_sub(bin.name.len());
+    let padding = " ".repeat(padding_needed);
+    println!("{}{} found", padding, bin.name.green());
   }
   Ok(())
 }
@@ -691,11 +702,13 @@ fn main() -> Result<()> {
           false,
           cli.full_versions,
         )?;
+      } else {
+        print_center_aligned(available, global_max_name_len, true, false)?;
       }
     }
     #[cfg(not(feature = "version-retrieval"))]
     {
-      print_center_aligned(available, global_max_name_len, true)?;
+      print_center_aligned(available, global_max_name_len)?;
     }
   }
 
