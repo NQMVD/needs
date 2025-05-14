@@ -1,5 +1,6 @@
 <div align="center">
   <h1>
+    <img alt="icon" src="https://github.com/NQMVD/needs/blob/master/icon.svg?raw=true" />
     <a href="https://github.com/NQMVD/needs">needs<a/>
   </h1>
   <h4>Check if given bin(s) are available on your system and, optionally, get their version.</h4>
