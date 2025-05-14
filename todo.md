@@ -17,3 +17,5 @@ TODO:
     - look at bat for that
 - add support for reading files directly
     - global cargo.toml for example
+- add support for dates as version
+    - awk version 20200816
