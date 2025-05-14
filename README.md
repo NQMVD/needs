@@ -1,16 +1,14 @@
-<div align="center">
-  <h1>
-    <img alt="icon" src="https://github.com/NQMVD/needs/blob/master/icon.svg?raw=true" />
-    <a href="https://github.com/NQMVD/needs">needs<a/>
-  </h1>
-  <h4>Check if given bin(s) are available on your system and, optionally, get their version.</h4>
-  <i>...multi-threaded of course..</i>
-  <h3></h3>
-</div>
-
-<div align="center">
+<h1>needs</h1>
+<img align="right" src="https://github.com/NQMVD/needs/blob/master/icon.svg?raw=true" height="120px" alt="icon"/>
 
 ![](https://img.shields.io/github/last-commit/NQMVD/needs?&style=for-the-badge&color=b1ffb4&logoColor=D9E0EE&labelColor=292324)  
+
+<h4>Check if given bin(s) are available on your system and, optionally, get their version.</h4>
+<i>...multi-threaded of course..</i>
+<h3></h3>
+
+made with:
+
 ![](https://img.shields.io/badge/Rust-fe7a15?style=for-the-badge&logo=rust&logoColor=white&logoSize=auto&labelColor=292324)
 [![](https://img.shields.io/crates/v/needs.svg?style=for-the-badge&logoColor=white&logoSize=auto&labelColor=292324)](https://crates.io/crates/needs)  
 [![](https://img.shields.io/badge/Charm-Gum-FAA5EA?style=for-the-badge&labelColor=292324)](https://github.com/charmbracelet/gum)
@@ -20,36 +18,38 @@
 
 </a>
 
-</div>
+<h1>
 
+</h1>
 
 ### Screenshots
 > using cli args
 
-![needs](https://github.com/NQMVD/needs/blob/master/images/screenshot.png?raw=true)
+<img src="https://github.com/NQMVD/needs/blob/master/images/screenshot.png?raw=true" height="420px" alt="screenshot"/>
 
 > using needsfile
 
-![needs](https://github.com/NQMVD/needs/blob/master/images/screenshot_file.png?raw=true)
+<img src="https://github.com/NQMVD/needs/blob/master/images/screenshot_file.png?raw=true" height="520px" alt="screenshot_file"/>
 
 ### Showcase
 
 Here are [freeze](https://github.com/charmbracelet/freeze)-generated screenshots of the latest version:
 
 <details>
-<summary>Click to expand</summary>
+<summary>Click to expand</summary>  
+<h3></h3>
 
 > just `needs`
 
-![needs_latest](https://github.com/NQMVD/needs/blob/master/images/needs_latest.png?raw=true)
+<img src="https://github.com/NQMVD/needs/blob/master/images/needs_latest.png?raw=true" height="380px" alt="needs_latest"/>  
 
 > `needs --no-versions` to skip version retrieval
 
-![needs_no_versions](https://github.com/NQMVD/needs/blob/master/images/needs_no_versions.png?raw=true)
+<img src="https://github.com/NQMVD/needs/blob/master/images/needs_no_versions.png?raw=true" height="380px" alt="needs_no_versions"/>
 
 > `needs -vvv` to see what's going on
 
-![needs_log](https://github.com/NQMVD/needs/blob/master/images/needs_log.png?raw=true)
+<img src="https://github.com/NQMVD/needs/blob/master/images/needs_log.png?raw=true" height="660px" alt="needs_log"/>
 
 This logging output was hand crafted with _(heavy)_ inspiration from [charm/log](https://github.com/charmbracelet/log) building on [env_logger](https://crates.io/crates/env_logger).  
 Ironically not because of the env-part of it, but because it feels like the simplest wrapper of std::log and it supports key-value-pairs which were very important to me.  
@@ -57,13 +57,17 @@ For now it will just reside inside of needs, but in the future I'm planning on m
 
 </details>
 
----
+<h1>
+
+</h1>
 
 ### Usage
 
 ![needs_help](https://github.com/NQMVD/needs/blob/master/images/needs_help.png?raw=true)
 
----
+<h1>
+
+</h1>
 
 ### Installation
 ```bash
@@ -83,7 +87,9 @@ cargo install needs --no-default-features
 > Target Platforms are UNIX based systems, Windows support is _not_ planned.
 > Because `needs` uses the `which` and `xshell` crates, it might run on Windows anyways though.
 
----
+<h1>
+
+</h1>
 
 ### Plans
 - [ ] timeouts for calling binaries
@@ -105,7 +111,9 @@ cargo install needs --no-default-features
 #### other
 - [ ] integrate tests and screenshot generation with workflows
 
----
+<h1>
+
+</h1>
 
 ## Disclaimer & Insights on calling binaries
 ### potential modifications
