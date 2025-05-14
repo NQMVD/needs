@@ -1,0 +1,37 @@
+default_job = "check"
+env.CARGO_TERM_COLOR = "always"
+
+[jobs.check]
+command = ["cargo", "check"]
+need_stdout = false
+
+[jobs.clippy]
+command = ["cargo", "clippy"]
+need_stdout = false
+
+[jobs.test]
+command = ["cargo", "test"]
+need_stdout = true
+
+[jobs.run]
+command = ["cargo", "run"]
+need_stdout = true
+allow_warnings = true
+background = true
+
+[jobs.run-verbose]
+command = ["cargo", "run", "--", "-vvvv"]
+need_stdout = true
+allow_warnings = true
+background = false
+
+[jobs.run-eza]
+command = ["cargo", "run", "--", "eza", "-vvvv"]
+need_stdout = true
+allow_warnings = true
+background = false
+
+[keybindings]
+c = "job:clippy-all"
+l = "job:run-verbose"
+e = "job:run-eza"
