@@ -9,6 +9,10 @@ need_stdout = false
 command = ["cargo", "clippy"]
 need_stdout = false
 
+[jobs.clippy-no-versions-feature]
+command = ["cargo", "clippy" , "--no-default-features"]
+need_stdout = false
+
 [jobs.test]
 command = ["cargo", "test"]
 need_stdout = true
@@ -37,8 +41,16 @@ need_stdout = true
 allow_warnings = true
 background = false
 
+[jobs.run-no-versions-feature]
+command = ["cargo", "run", "--no-default-features", "--", "-vvvv"]
+need_stdout = true
+allow_warnings = true
+background = false
+
 [keybindings]
 c = "job:clippy"
 l = "job:run-verbose"
 e = "job:run-eza"
 g = "job:run-grep"
+n = "job:run-no-versions-feature"
+v = "job:clippy-no-versions-feature"
