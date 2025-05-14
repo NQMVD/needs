@@ -1,4 +1,4 @@
-default_job = "check"
+default_job = "clippy"
 env.CARGO_TERM_COLOR = "always"
 
 [jobs.check]
@@ -31,7 +31,14 @@ need_stdout = true
 allow_warnings = true
 background = false
 
+[jobs.run-grep]
+command = ["cargo", "run", "--", "grep", "-f", "-vvvv"]
+need_stdout = true
+allow_warnings = true
+background = false
+
 [keybindings]
-c = "job:clippy-all"
+c = "job:clippy"
 l = "job:run-verbose"
 e = "job:run-eza"
+g = "job:run-grep"

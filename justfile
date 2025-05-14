@@ -15,11 +15,23 @@ release_build := "./target/release/needs"
     hr
     cd ./needsfiles/collection && cargo r -- -vvvv
     hr
-    cd ./needsfiles/empty && cargo r -- -vvvv
+    -mkdir ./needsfiles/empty
+    -cd ./needsfiles/empty && cargo r -- -vvvv
     hr
     cd ./needsfiles/never_present && cargo r -- -vvvv
     hr
-    cd ./needsfiles/non_existent && cargo r -- -vvvv || true
+    -cd ./needsfiles/non_existent && cargo r -- -vvvv
+    
+@test_all:
+    cargo clippy
+    cargo test
+    cd ./needsfiles/always_present && cargo r
+    cd ./needsfiles/builtins && cargo r
+    cd ./needsfiles/collection && cargo r
+    -mkdir ./needsfiles/empty
+    -cd ./needsfiles/empty && cargo r
+    cd ./needsfiles/never_present && cargo r
+    -cd ./needsfiles/non_existent && cargo r
 
 @build:
     cargo build --release &> /dev/null
