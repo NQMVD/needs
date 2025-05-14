@@ -8,10 +8,10 @@ use clap::Parser;
 use colored::Colorize;
 use log::kv::*;
 use log::*;
+use semver::{BuildMetadata, Prerelease, Version};
 use std::fmt;
 use std::fmt::Arguments;
 use std::{collections::BTreeMap, fmt::Display, time::Instant};
-use semver::{BuildMetadata, Prerelease, Version};
 // add miette
 
 #[cfg(feature = "version-retrieval")]
@@ -71,7 +71,12 @@ fn format_version(value: &Version, full_versions: bool) -> impl fmt::Display + '
   impl fmt::Display for Wrapper<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
       if self.1 {
-        write!(f, "{}.{}.{}{}{}", self.0.major, self.0.minor, self.0.patch, 
+        write!(
+          f,
+          "{}.{}.{}{}{}",
+          self.0.major,
+          self.0.minor,
+          self.0.patch,
           if self.0.pre.is_empty() {
             "".to_string()
           } else {
@@ -241,7 +246,7 @@ fn partition_binaries(binaries_to_check: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, V
 }
 
 #[cfg(feature = "version-retrieval")]
-fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
+fn execute_binary<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
   // TODO: log the frequency of these
   // TODO: filter out known binaries that don't have a version
   let known_binaries = known_binaries();
@@ -290,10 +295,10 @@ fn extract_version<'a>(output: Cow<'a, str>, binary_name: Cow<'a, str>) -> Optio
     if let Some(captures) = VER_REGEX.captures(line) {
       let version_string = &captures[1];
       info!(SCOPE = binary_name.as_ref(), version:debug = version_string, line = line; "version found");
-      
+
       let version_string = clean_version_string(version_string);
       debug!(SCOPE = binary_name.as_ref(), version:debug = version_string; "cleaned version");
-      
+
       return Some(Cow::owned(version_string.to_string()));
     }
   }
@@ -305,13 +310,14 @@ fn extract_version<'a>(output: Cow<'a, str>, binary_name: Cow<'a, str>) -> Optio
 #[cfg(feature = "version-retrieval")]
 fn get_version(binary_name: Cow<str>) -> Option<Version> {
   let now = Instant::now();
-  match run_command_with_version(binary_name.as_ref()) {
+  let output = execute_binary(binary_name.as_ref());
+  trace!(
+      SCOPE = binary_name.as_ref(),
+      ms = now.elapsed().as_millis();
+      "calling binary took"
+  );
+  match output {
     Some(output) => {
-      trace!(
-          SCOPE = binary_name.as_ref(),
-          ms = now.elapsed().as_millis();
-          "calling binary took"
-      );
       trace!(
         SCOPE = binary_name.as_ref(), output = output.as_ref(); "command output");
       let version_string = match extract_version(output.clone(), binary_name.clone()) {
@@ -332,14 +338,7 @@ fn get_version(binary_name: Cow<str>) -> Option<Version> {
       };
       Some(version)
     }
-    None => {
-      trace!(
-          SCOPE = binary_name.as_ref(),
-          ms = now.elapsed().as_millis();
-          "calling binary took"
-      );
-      None
-    }
+    None => None,
   }
 }
 
@@ -395,12 +394,12 @@ fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
             continue; // Try next file if this one is empty
           }
           let names: Vec<String> = content.split_whitespace().map(|s| s.to_owned()).collect();
-
-          ensure!(
-            !names.is_empty(),
-            "needsfile at '{}' is effectively empty after parsing.",
-            path
-          );
+          if names.is_empty() {
+            bail_cause = "needsfile found but it is empty";
+            warn!(path = path; "needsfile found but it is empty, trying next.");
+            continue; // Try next file if this one is empty
+          }
+          
           debug!(path:debug = path, binaries:debug = &names; "found needsfile");
           let binaries = names
             .iter()
@@ -422,7 +421,12 @@ fn sort_binaries(binaries: &mut Vec<Binary>) {
   binaries.sort_by(|a, b| a.name.cmp(&b.name))
 }
 
-fn print_center_aligned(binaries: Vec<Binary>, max_len: usize, always_found: bool, full_versions: bool) -> Result<()> {
+fn print_center_aligned(
+  binaries: Vec<Binary>,
+  max_len: usize,
+  always_found: bool,
+  full_versions: bool,
+) -> Result<()> {
   for bin in &binaries {
     let padding_needed = max_len.saturating_sub(bin.name.len());
     let padding = " ".repeat(padding_needed);
@@ -663,7 +667,7 @@ fn main() -> Result<()> {
     info!("quiet exit, all found");
     std::process::exit(0);
   }
-  
+
   sort_binaries(&mut available);
   sort_binaries(&mut not_available);
 
@@ -675,7 +679,12 @@ fn main() -> Result<()> {
       if !cli.no_versions {
         let mut bins_with_versions = get_versions_for_bins(available);
         sort_binaries(&mut bins_with_versions);
-        print_center_aligned(bins_with_versions, global_max_name_len, false, cli.full_versions)?;
+        print_center_aligned(
+          bins_with_versions,
+          global_max_name_len,
+          false,
+          cli.full_versions,
+        )?;
       }
     }
     #[cfg(not(feature = "version-retrieval"))]
@@ -841,7 +850,7 @@ mod tests {
     // For now, we'll test with a common command if possible, or skip if too flaky.
     // For instance, if 'cargo' is available in the test environment:
     let binary_name = "cargo"; // A binary likely present in dev environment
-    let version_output = run_command_with_version(binary_name);
+    let version_output = execute_binary(binary_name);
     println!("Version output for {}: {:?}", binary_name, version_output);
     if which::which(binary_name).is_ok() {
       // Only assert if cargo is actually found
