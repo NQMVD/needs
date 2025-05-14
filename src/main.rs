@@ -1,12 +1,18 @@
 #![allow(clippy::never_loop)] // because of the files that can vary depending on the system
+#![allow(unused_imports)]
 use anyhow::{Result, bail, ensure};
+use atty::{Stream, is};
 use beef::Cow;
 use chrono::Local;
 use clap::Parser;
 use colored::Colorize;
 use log::kv::*;
 use log::*;
-use std::{collections::BTreeMap, time::Instant};
+use semver::{BuildMetadata, Prerelease, Version};
+use std::fmt;
+use std::fmt::Arguments;
+use std::{collections::BTreeMap, fmt::Display, time::Instant};
+// add miette
 
 #[cfg(feature = "version-retrieval")]
 use once_cell::sync::Lazy;
@@ -22,12 +28,16 @@ use xshell::{Shell, cmd};
 #[derive(Debug)]
 struct Binary<'a> {
   name: Cow<'a, str>,
-  version: Cow<'a, str>,
+  // TODO: use a custom version type
+  version: Option<Version>,
 }
 
 impl<'a> Binary<'a> {
-  fn new(name: Cow<'a, str>, version: Cow<'a, str>) -> Self {
-    Self { name, version }
+  fn new(name: Cow<'a, str>) -> Self {
+    Self {
+      name,
+      version: None,
+    }
   }
 }
 
@@ -35,9 +45,187 @@ impl Default for Binary<'_> {
   fn default() -> Self {
     Self {
       name: Cow::borrowed(""),
-      version: Cow::borrowed("?"),
+      version: Some(unknown_version()),
     }
   }
+}
+
+impl Display for Binary<'_> {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    if self.version.is_none() {
+      write!(f, "{} ?", self.name)
+    } else {
+      write!(
+        f,
+        "{} {}",
+        self.name,
+        format_version(self.version.as_ref().unwrap(), false)
+      )
+    }
+  }
+}
+
+fn format_version(value: &Version, full_versions: bool) -> impl fmt::Display + '_ {
+  struct Wrapper<'a>(&'a Version, bool);
+
+  impl fmt::Display for Wrapper<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+      if self.1 {
+        write!(
+          f,
+          "{}.{}.{}{}{}",
+          self.0.major,
+          self.0.minor,
+          self.0.patch,
+          if self.0.pre.is_empty() {
+            "".to_string()
+          } else {
+            format!("-{}", self.0.pre)
+          },
+          if self.0.build.is_empty() {
+            "".to_string()
+          } else {
+            format!("+{}", self.0.build)
+          }
+        )
+      } else {
+        write!(f, "{}.{}.{}", self.0.major, self.0.minor, self.0.patch)
+      }
+    }
+  }
+
+  Wrapper(value, full_versions)
+}
+
+// list known binaries that dont have a version
+#[cfg(feature = "version-retrieval")]
+fn known_binaries() -> Vec<Cow<'static, str>> {
+  vec![
+    // shell builtins
+    Cow::borrowed("ls"),
+    Cow::borrowed("cd"),
+    Cow::borrowed("pwd"),
+    Cow::borrowed("echo"),
+    Cow::borrowed("cat"),
+    Cow::borrowed("find"),
+    Cow::borrowed("awk"), // no semver, just the date
+    Cow::borrowed("sed"),
+    Cow::borrowed("cut"),
+    //Cow::borrowed("sort"), // 2.3-Apple (195)
+    Cow::borrowed("uniq"),
+    Cow::borrowed("wc"),
+    Cow::borrowed("head"),
+    Cow::borrowed("tail"),
+    Cow::borrowed("chmod"),
+    Cow::borrowed("chown"),
+    Cow::borrowed("ln"),
+    Cow::borrowed("mkdir"),
+    Cow::borrowed("rmdir"),
+    Cow::borrowed("rm"),
+    Cow::borrowed("cp"),
+    Cow::borrowed("mv"),
+    Cow::borrowed("touch"),
+    Cow::borrowed("ssh"),
+    Cow::borrowed("nice"),
+  ]
+}
+
+fn unknown_version() -> Version {
+  Version {
+    major: 0,
+    minor: 0,
+    patch: 0,
+    pre: Prerelease::EMPTY,
+    build: BuildMetadata::new("unknown").unwrap(),
+  }
+}
+
+#[cfg(feature = "version-retrieval")]
+static _SEMVER_REGEX: Lazy<Regex> = Lazy::new(|| {
+  Regex::new(r"(?:^|\s)((?:[<>=~^]|>=|<=)?)(?:v)?((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:-(?:[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?:[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?)").unwrap()
+});
+
+#[cfg(feature = "version-retrieval")]
+static VER_REGEX: Lazy<Regex> = Lazy::new(|| {
+  Regex::new(r"(\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)").unwrap()
+});
+
+#[cfg(feature = "version-retrieval")]
+fn clean_version_string(version_str: &str) -> String {
+  // Split the version into main components: version numbers, prerelease, and build metadata
+  let parts: Vec<&str> = version_str.splitn(2, '+').collect();
+  let version_and_prerelease = parts[0];
+  let build_metadata = if parts.len() > 1 {
+    Some(parts[1])
+  } else {
+    None
+  };
+
+  let pre_parts: Vec<&str> = version_and_prerelease.splitn(2, '-').collect();
+  let version_numbers = pre_parts[0];
+  let prerelease = if pre_parts.len() > 1 {
+    Some(pre_parts[1])
+  } else {
+    None
+  };
+
+  // Clean version numbers by removing leading zeros
+  let mut cleaned_version = Vec::new();
+  for segment in version_numbers.split('.') {
+    if segment.starts_with('0') && segment.len() > 1 {
+      // Remove leading zeros (e.g., "01" -> "1")
+      let cleaned = segment.trim_start_matches('0');
+      if cleaned.is_empty() {
+        cleaned_version.push("0".to_string()); // All zeros case
+      } else {
+        cleaned_version.push(cleaned.to_string());
+      }
+    } else {
+      cleaned_version.push(segment.to_string());
+    }
+  }
+
+  // Ensure we have at least 2 segments (major.minor)
+  while cleaned_version.len() == 2 {
+    cleaned_version.push("0".to_string());
+  }
+
+  // Clean prerelease by removing invalid characters
+  let cleaned_prerelease = prerelease
+    .map(|pre| {
+      let re = Regex::new(r"[^0-9A-Za-z-.]").unwrap();
+      let replaced = re.replace_all(pre, "");
+
+      // Split by dots and remove any empty segments
+      let segments: Vec<&str> = replaced.split('.').filter(|s| !s.is_empty()).collect();
+      segments.join(".")
+    })
+    .filter(|s| !s.is_empty());
+
+  // Clean build metadata by removing invalid characters
+  let cleaned_build = build_metadata
+    .map(|build| {
+      let re = Regex::new(r"[^0-9A-Za-z-.]").unwrap();
+      let replaced = re.replace_all(build, "");
+
+      // Split by dots and remove any empty segments
+      let segments: Vec<&str> = replaced.split('.').filter(|s| !s.is_empty()).collect();
+      segments.join(".")
+    })
+    .filter(|s| !s.is_empty());
+
+  // Construct the final cleaned version string
+  let mut result = cleaned_version.join(".");
+
+  if let Some(pre) = cleaned_prerelease {
+    result.push_str(&format!("-{}", pre));
+  }
+
+  if let Some(build) = cleaned_build {
+    result.push_str(&format!("+{}", build));
+  }
+
+  result
 }
 
 fn partition_binaries(binaries_to_check: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, Vec<Binary<'_>>) {
@@ -47,10 +235,10 @@ fn partition_binaries(binaries_to_check: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, V
   for binary in binaries_to_check {
     let name = binary.name.as_ref();
     if which::which(name).is_ok() {
-      debug!(bin = name; "found");
+      info!(SCOPE = "which", bin = name; "found");
       available.push(binary);
     } else {
-      debug!(bin = name; "not found");
+      info!(SCOPE = "which", bin = name; "not found");
       not_available.push(binary);
     }
   }
@@ -58,7 +246,7 @@ fn partition_binaries(binaries_to_check: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, V
 }
 
 #[cfg(feature = "version-retrieval")]
-fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
+fn execute_binary<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
   // TODO: log the frequency of these
 
   let version_flags = ["--version", "-v", "-version", "-V"];
@@ -67,7 +255,7 @@ fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
     let sh = match Shell::new() {
       Ok(s) => s,
       Err(e) => {
-        debug!(error:display = e; "Error creating shell");
+        error!(error:display = e; "Error creating shell");
         return None;
       }
     };
@@ -78,152 +266,193 @@ fn run_command_with_version<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
     match command.read() {
       Ok(output) => return Some(Cow::owned(output)),
       Err(_) => {
-        debug!(bin = binary_name, flag = flag; "flag didn't work, trying next...");
+        debug!(SCOPE = binary_name, flag = flag; "flag didn't work, trying next...");
         continue;
       }
     };
   }
-  debug!(bin = binary_name; "no version found");
+  info!(scope = binary_name; "no version flag found, see --help or check builtins");
   None
 }
 
-#[cfg(not(feature = "version-retrieval"))]
-fn run_command_with_version<'a>(_binary_name: &str) -> Option<Cow<'a, str>> {
-  None // Always return None if feature is disabled
+#[cfg(feature = "version-retrieval")]
+fn extract_version<'a>(output: Cow<'a, str>, binary_name: Cow<'a, str>) -> Option<Cow<'a, str>> {
+  let lines = output
+    .lines()
+    .filter(|l| l.chars().any(|c| c.is_ascii_digit()))
+    .collect::<Vec<_>>();
+
+  trace!(SCOPE = binary_name.as_ref(), lines:debug = lines; "filtered lines:");
+
+  for line in &lines {
+    // TODO: check all lines for more info (deno e.g.)
+    if let Some(captures) = VER_REGEX.captures(line) {
+      let version_string = &captures[1];
+      info!(SCOPE = binary_name.as_ref(), version:debug = version_string, line = line; "version found");
+
+      let version_string = clean_version_string(version_string);
+      debug!(SCOPE = binary_name.as_ref(), version:debug = version_string; "cleaned version");
+
+      return Some(Cow::owned(version_string.to_string()));
+    }
+  }
+
+  warn!(SCOPE = binary_name.as_ref(), output = output.as_ref(); "No valid version found in the output");
+  None
 }
 
 #[cfg(feature = "version-retrieval")]
-fn extract_version(output: Cow<str>) -> String {
-  static VERSION_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap());
-
-  let mut version_to_return: String = "?".into();
-  let lines = output.lines().collect::<Vec<_>>();
-
-  for line in &lines {
-    if let Some(captures) = VERSION_REGEX.captures(line) {
-      if let Some(m) = captures.get(1) {
-        version_to_return = m.as_str().to_string();
-        let formatted_captures = captures
-          .iter()
-          .map(|c| c.map_or("".to_string(), |m| m.as_str().to_string()))
-          .collect::<Vec<_>>()
-          .join("\n");
-        debug!(captures = formatted_captures.as_str(), line = line; "version found");
-      }
-      break;
+fn get_version(binary_name: Cow<str>) -> Option<Version> {
+  let now = Instant::now();
+  let output = execute_binary(binary_name.as_ref());
+  trace!(
+      SCOPE = binary_name.as_ref(),
+      ms = now.elapsed().as_millis();
+      "calling binary took"
+  );
+  match output {
+    Some(output) => {
+      trace!(
+        SCOPE = binary_name.as_ref(), output = output.as_ref(); "command output");
+      let version_string = match extract_version(output.clone(), binary_name.clone()) {
+        Some(v) => v,
+        None => {
+          return None;
+        }
+      };
+      let version = match Version::parse(version_string.as_ref()) {
+        Ok(v) => {
+          debug!(SCOPE = binary_name.as_ref(), version:debug = v; "version parsed");
+          v
+        }
+        Err(e) => {
+          warn!(SCOPE = binary_name.as_ref(), error:display = e; "error parsing version");
+          return None;
+        }
+      };
+      Some(version)
     }
+    None => None,
   }
-
-  version_to_return // Return the extracted version or "?" at the end
 }
 
-#[cfg(not(feature = "version-retrieval"))]
-fn extract_version(_output: Cow<str>) -> String {
-  "?".into() // Always return "?" if feature is disabled
+#[cfg(feature = "version-retrieval")]
+fn get_versions_for_bins(binaries: Vec<Binary>) -> Vec<Binary> {
+  binaries
+    .into_par_iter()
+    .map(|binary| {
+      // filter out known binaries that don't have a version
+      if known_binaries().contains(&binary.name) {
+        return Binary {
+          name: binary.name,
+          version: None
+        };
+      }
+      
+      let version = get_version(binary.name.clone());
+      Binary {
+        name: binary.name,
+        version,
+      }
+    })
+    .collect()
 }
 
 fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
-  match cli.bins.clone() {
+  let mut bail_cause =
+    "No valid needsfile found. Please provide a list of binaries or create a needsfile.";
+  let bins = match cli.bins.clone() {
     Some(bins) => {
-      let binaries: Vec<Binary> = bins
-        .iter()
-        .map(|name| Binary::new(Cow::owned(name.clone()), Cow::borrowed("?")))
-        .collect::<Vec<Binary>>();
-      Ok(binaries)
+      debug!(bins:debug = bins; "got bins from args");
+      bins
     }
     None => {
+      debug!("no bins from args, trying to read from needsfiles");
       let file_paths = ["needsfile", ".needsfile", "needs", ".needs"];
+      let mut bins = Vec::new();
 
       for path in file_paths {
         // Attempt to read from the first successful file path
-        if let Ok(content) = std::fs::read_to_string(path) {
-          if content.trim().is_empty() {
-            debug!(path = path; "needsfile found but it is empty, trying next.");
-            continue; // Try next file if this one is empty
-          }
-          let names: Vec<String> = content.split_whitespace().map(|s| s.to_owned()).collect();
+        let read_to_string = std::fs::read_to_string(path);
+        match read_to_string {
+          Ok(content) => {
+            if content.trim().is_empty() {
+              bail_cause = "needsfile found but it is empty";
+              warn!(path = path; "needsfile found but it is empty, trying next.");
+              continue; // Try next file if this one is empty
+            }
+            let names: Vec<String> = content.split_whitespace().map(|s| s.to_owned()).collect();
+            if names.is_empty() {
+              bail_cause = "needsfile found but it is empty";
+              warn!(path = path; "needsfile found but it is empty, trying next.");
+              continue; // Try next file if this one is empty
+            }
 
-          // This ensure might be redundant if content.trim().is_empty() check is robust
-          ensure!(
-            !names.is_empty(),
-            "needsfile at '{}' is effectively empty after parsing.",
-            path
-          );
-          let binaries = names
-            .iter()
-            .map(|name_str| Binary::new(Cow::owned(name_str.clone()), Cow::borrowed("?")))
-            .collect::<Vec<Binary>>();
-          return Ok(binaries);
-        } else {
-          debug!(path = path; "Failed to read or find needsfile, trying next.");
+            debug!(path:debug = path, binaries:debug = &names; "found needsfile");
+            bins.extend(names);
+            break;
+          }
+          Err(_) => {
+            debug!(path = path; "Failed to read or find needsfile, trying next.");
+          }
         }
       }
-      bail!(
-        "No binaries specified and no non-empty needsfile (needsfile, .needsfile, needs, .needs) found."
-      );
+      if bins.is_empty() {
+        warn!("No valid needsfile found");
+        bail!(bail_cause);
+      } else {
+        bins
+      }
     }
+  };
+
+  let binaries: Vec<Binary> = bins
+    .iter()
+    // filter out empty strings
+    .filter(|name| !name.is_empty())
+    .map(|name| Binary::new(Cow::owned(name.clone())))
+    .collect::<Vec<Binary>>();
+  
+  // LEAVE this here because sometimes collecting the binaries fails
+  if binaries.is_empty() {
+    error!(binaries:debug = &binaries; "binary collection failed");
   }
+  Ok(binaries)
 }
 
 fn sort_binaries(binaries: &mut Vec<Binary>) {
   binaries.sort_by(|a, b| a.name.cmp(&b.name))
 }
 
-#[cfg(feature = "version-retrieval")]
-fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
-  binaries
-    .into_par_iter()
-    .map(|binary| {
-      let now = Instant::now();
-      match run_command_with_version(binary.name.as_ref()) {
-        Some(output) => {
-          debug!(
-              bin = binary.name.as_ref(),
-              ms = now.elapsed().as_millis();
-              "calling binary took"
-          );
-          debug!(
-            bin = binary.name.as_ref(), output = output.as_ref(); "command output");
-          Binary::new(binary.name, Cow::owned(extract_version(output)))
-        }
-        None => {
-          debug!(
-              bin = binary.name.as_ref(),
-              ms = now.elapsed().as_millis();
-              "calling binary took"
-          );
-          Binary::new(binary.name, Cow::borrowed("?"))
-        }
-      }
-    })
-    .collect()
-}
-
-#[cfg(not(feature = "version-retrieval"))]
-fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
-  binaries // Just return them as is, versions will remain "?"
-}
-
-fn print_center_aligned(binaries: Vec<Binary>, max_len: usize, always_found: bool) -> Result<()> {
+fn print_center_aligned(
+  binaries: Vec<Binary>,
+  max_len: usize,
+  always_found: bool,
+  full_versions: bool,
+) -> Result<()> {
   for bin in &binaries {
     let padding_needed = max_len.saturating_sub(bin.name.len());
     let padding = " ".repeat(padding_needed);
     let version_display = if always_found {
       "found".to_string()
     } else {
-      bin.version.to_string()
+      match bin.version {
+        Some(ref version) => format!("{}", format_version(version, full_versions)),
+        None => "?".to_string(),
+      }
     };
-    println!("{}{} {}", padding, bin.name.bright_green(), version_display);
+    println!("{}{} {}", padding, bin.name.green(), version_display);
   }
   Ok(())
 }
 
-struct Collect<'kvs>(BTreeMap<Key<'kvs>, Value<'kvs>>);
+struct Collect<'kvs>(BTreeMap<Cow<'kvs, str>, Cow<'kvs, str>>);
 
 impl<'kvs> VisitSource<'kvs> for Collect<'kvs> {
   fn visit_pair(&mut self, key: Key<'kvs>, value: Value<'kvs>) -> Result<(), kv::Error> {
-    self.0.insert(key, value);
+    self
+      .0
+      .insert(key.to_string().into(), value.to_string().into());
     Ok(())
   }
 }
@@ -266,8 +495,15 @@ fn setup_logger(verbosity: u8) -> Result<(), fern::InitError> {
           .iter()
           .partition::<Vec<_>, _>(|(_, v)| !v.to_string().contains('\n'));
 
+        // check if theres a key named SCOPE, if so pop it out and print infront of message
+        let scope = single
+          .iter()
+          .find(|(k, _)| *k == "SCOPE")
+          .map(|(k, v)| (k.to_string(), v.to_string()));
+
         let formatted_pairs = single
           .iter()
+          .filter(|(k, _)| *k != "SCOPE")
           .map(|(k, v)| {
             let k = k.to_string().as_str().truecolor(142, 142, 142);
             let eq = "=".truecolor(142, 142, 142);
@@ -296,15 +532,40 @@ fn setup_logger(verbosity: u8) -> Result<(), fern::InitError> {
           .collect::<Vec<_>>()
           .join("\n  ");
 
-        if multiline.is_empty() {
-          out.finish(format_args!(
-            "{time} {lvl_colored} {message} {formatted_pairs}"
-          ))
-        } else {
-          out.finish(format_args!(
-            "{time} {lvl_colored} {message} {formatted_pairs}\n  {formatted_multiline_pairs}"
-          ))
-        }
+        // let mut final_format_string = "{time} {lvl_colored} ".to_owned();
+
+        // if let Some((_, v)) = scope {
+        //   final_format_string.push_str(&format!("({}) ", v.bold()));
+        // }
+
+        // final_format_string.push_str("{message} ");
+
+        // if !single.is_empty() {
+        //   final_format_string.push_str("{formatted_pairs}", );
+        // }
+
+        // if !multiline.is_empty() {
+        //   final_format_string.push_str("\n  {formatted_multiline_pairs}");
+        // }
+
+        out.finish(format_args!(
+          "{time} {lvl_colored} {}{message}{}{}",
+          if let Some((_, v)) = scope {
+            format!("[{}] ", v.bold())
+          } else {
+            "".to_string()
+          },
+          if !single.is_empty() {
+            format!(" {}", formatted_pairs)
+          } else {
+            "".to_string()
+          },
+          if !multiline.is_empty() {
+            format!("\n  {}", formatted_multiline_pairs)
+          } else {
+            "".to_string()
+          }
+        ))
       } else {
         out.finish(format_args!("{time} {lvl_colored} {message}"))
       }
@@ -312,6 +573,19 @@ fn setup_logger(verbosity: u8) -> Result<(), fern::InitError> {
     .level(log_level)
     .chain(std::io::stdout())
     .apply()?;
+
+  //   let tracing_level = match verbosity {
+  //   0 => tracing::Level::ERROR,
+  //   1 => tracing::Level::WARN,
+  //   2 => tracing::Level::INFO,
+  //   3 => tracing::Level::DEBUG,
+  //   _ => tracing::Level::TRACE,
+  // };
+  // let subscriber = FmtSubscriber::builder()
+  //   .with_max_level(tracing_level)
+  //   .finish();
+  // tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
   Ok(())
 }
 
@@ -346,6 +620,11 @@ struct Cli {
   /// don't check for versions
   #[clap(short, long)]
   no_versions: bool,
+
+  #[cfg(feature = "version-retrieval")]
+  /// show the full version string TODO: implement
+  #[clap(short, long)]
+  full_versions: bool,
 }
 
 fn main() -> Result<()> {
@@ -353,8 +632,27 @@ fn main() -> Result<()> {
 
   setup_logger(cli.verbosity).expect("Failed to set up logger");
 
-  let binaries_from_source = get_binary_names(&cli)?;
-  ensure!(!binaries_from_source.is_empty(), "binary sources are empty");
+  debug!("Starting needs with verbosity level {}", cli.verbosity);
+  debug!("passed bins: {:?}", cli.bins);
+  debug!("quiet: {:?}", cli.quiet);
+  // debug!("atty stdout: {}", is(Stream::Stdout));
+  // debug!("atty stderr: {}", is(Stream::Stderr));
+  // debug!("atty stdin: {}", is(Stream::Stdin));
+
+  let binaries_from_source = match get_binary_names(&cli) {
+    Ok(bins) => {
+      debug!(binaries:debug = &bins; "got binaries from source");
+      bins
+    }
+    Err(err) => {
+      error!(error:display = err; "Error getting binaries");
+      std::process::exit(1);
+    }
+  };
+  if binaries_from_source.is_empty() {
+    error!("No binaries found, binary sources are empty");
+    std::process::exit(1);
+  }
 
   // Calculate max_name_len from all initial binaries for consistent padding
   let global_max_name_len = binaries_from_source
@@ -365,46 +663,39 @@ fn main() -> Result<()> {
 
   let (mut available, mut not_available) = partition_binaries(binaries_from_source);
 
-  sort_binaries(&mut available);
-  sort_binaries(&mut not_available);
+  let stay_quiet = cli.quiet;
 
-  if cli.quiet {
+  if stay_quiet {
     if !not_available.is_empty() {
+      info!(not_available:debug = not_available; "quiet exit, not found:");
       std::process::exit(1);
     }
-    info!("quiet exit");
+    info!("quiet exit, all found");
     std::process::exit(0);
   }
 
+  sort_binaries(&mut available);
+  sort_binaries(&mut not_available);
+
   let needs_separator = !available.is_empty() && !not_available.is_empty();
 
-  let should_skip_versions = {
+  if !available.is_empty() {
     #[cfg(feature = "version-retrieval")]
     {
-      cli.no_versions
+      if !cli.no_versions {
+        let mut bins_with_versions = get_versions_for_bins(available);
+        sort_binaries(&mut bins_with_versions);
+        print_center_aligned(
+          bins_with_versions,
+          global_max_name_len,
+          false,
+          cli.full_versions,
+        )?;
+      }
     }
     #[cfg(not(feature = "version-retrieval"))]
     {
-      true
-    }
-  };
-
-  if !available.is_empty() {
-    if should_skip_versions {
       print_center_aligned(available, global_max_name_len, true)?;
-    } else {
-      #[cfg(feature = "version-retrieval")]
-      {
-        let mut bins_with_versions = get_versions(available);
-        sort_binaries(&mut bins_with_versions);
-        print_center_aligned(bins_with_versions, global_max_name_len, false)?;
-      }
-      #[cfg(not(feature = "version-retrieval"))]
-      {
-        // This case should not be reached if should_skip_versions is true,
-        // but as a fallback, print with 'found'
-        print_center_aligned(available, global_max_name_len, true)?;
-      }
     }
   }
 
@@ -418,7 +709,7 @@ fn main() -> Result<()> {
       // Align "not found" with the names of "found" items.
       let padding_needed = global_max_name_len.saturating_sub(binary.name.len());
       let padding = " ".repeat(padding_needed);
-      println!("{}{} not found", padding, binary.name.bright_red());
+      println!("{}{} not found", padding, binary.name.red());
     }
   }
 
@@ -431,43 +722,112 @@ mod tests {
 
   #[cfg(feature = "version-retrieval")]
   #[test]
+  fn test_version_regex() {
+    // separate list just for operator test
+    let _operator_test_strings = [
+      ("v1.0.0"),
+      ("=1.0.0"),
+      ("=v1.0.0"),
+      (">1.0.0"),
+      (">v1.0.0"),
+      ("<1.0.0"),
+      (">=1.0.0"),
+      ("<=1.0.0"),
+      ("~1.0.0"),
+      ("^1.0.0"),
+      ("1.0.0-alpha"),
+      ("v1.0.0-alpha"),
+      ("1.0.0-alpha.1"),
+      ("1.0.0+build.1"),
+      ("1.0.0-alpha+beta"),
+      (">1.0.0-alpha+beta"),
+    ];
+
+    let test_strings = [
+      ("1.0.0", "1.0.0"),
+      // eza
+      ("v1.0.0", "1.0.0"),
+      // luajit
+      ("2.1.1713773202", "2.1.1713773202"),
+      // viddy
+      ("1.3.0-VERGEN_IDEMPOTENT_OUTPUT", "1.3.0-VERGEN"),
+      // helix
+      ("25.01.1", "25.1.1"),
+      // love2d
+      ("11.5", "11.5.0"),
+    ];
+
+    for (output, expected) in test_strings {
+      let captures = VER_REGEX.captures(output);
+      assert!(captures.is_some(), "Failed to match: {}", output);
+      if let Some(captures) = captures {
+        let version_str = &captures[1];
+
+        let version_string_cleaned = clean_version_string(version_str);
+        println!(
+          "Version string cleaned: {} -> {}",
+          version_str, version_string_cleaned
+        );
+
+        let version = Version::parse(&version_string_cleaned);
+        let expected = Version::parse(expected).unwrap();
+        match version {
+          Ok(v) => {
+            assert_eq!(v, expected);
+          }
+          Err(e) => panic!(
+            "Failed to parse version: {}\nExpected: {}\n     Got: {}",
+            e, expected, version_str
+          ),
+        }
+      }
+    }
+  }
+
+  #[cfg(feature = "version-retrieval")]
+  #[test]
   fn test_extract_version_feature_on() {
-    let output = "v1.2.3\n";
-    let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "1.2.3");
+    let output = "1.2.3\n";
+    let version = extract_version(Cow::borrowed(output), Cow::borrowed("test_binary"));
+    assert_eq!(version.as_ref(), Some(&Cow::borrowed("1.2.3")));
+    let output = "100.200.300\n";
+    let version = extract_version(Cow::borrowed(output), Cow::borrowed("test_binary"));
+    assert_eq!(version.as_ref(), Some(&Cow::borrowed("100.200.300")));
 
-    let output = "v100.200.300\n";
-    let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "100.200.300");
-
-    let output = "v1.2.3-nightly\n";
-    let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "1.2.3-n"); // Corrected assertion
+    let output = "1.2.3-nightly\n";
+    let version = extract_version(Cow::borrowed(output), Cow::borrowed("test_binary"));
+    assert_eq!(version.as_ref(), Some(&Cow::borrowed("1.2.3-nightly")));
   }
 
   #[cfg(feature = "version-retrieval")]
   #[test]
   fn test_extract_version_no_match_feature_on() {
     let output = "no version found\n";
-    let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "?");
+    let version = extract_version(Cow::borrowed(output), Cow::borrowed("test_binary"));
+    assert_eq!(version, None);
   }
 
-  #[cfg(not(feature = "version-retrieval"))]
+  #[cfg(feature = "version-retrieval")]
   #[test]
-  fn test_extract_version_feature_off() {
-    let output = "v1.2.3\n";
-    let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "?");
-  }
+  fn test_ls() {}
 
+  #[cfg(feature = "version-retrieval")]
   fn create_test_cli(bins: Option<Vec<String>>, no_versions_flag: bool) -> Cli {
     Cli {
       bins,
       quiet: false,
       verbosity: 0,
-      #[cfg(feature = "version-retrieval")]
       no_versions: no_versions_flag,
+      full_versions: false,
+    }
+  }
+
+  #[cfg(not(feature = "version-retrieval"))]
+  fn create_test_cli(bins: Option<Vec<String>>, _no_versions_flag: bool) -> Cli {
+    Cli {
+      bins,
+      quiet: false,
+      verbosity: 0,
     }
   }
 
@@ -496,7 +856,7 @@ mod tests {
     // For now, we'll test with a common command if possible, or skip if too flaky.
     // For instance, if 'cargo' is available in the test environment:
     let binary_name = "cargo"; // A binary likely present in dev environment
-    let version_output = run_command_with_version(binary_name);
+    let version_output = execute_binary(binary_name);
     println!("Version output for {}: {:?}", binary_name, version_output);
     if which::which(binary_name).is_ok() {
       // Only assert if cargo is actually found
@@ -518,17 +878,6 @@ mod tests {
     }
   }
 
-  #[cfg(not(feature = "version-retrieval"))]
-  #[test]
-  fn test_run_command_with_version_feature_off() {
-    let binary_name = "any_binary";
-    let version_output = run_command_with_version(binary_name);
-    assert!(
-      version_output.is_none(),
-      "run_command_with_version should return None when feature is off"
-    );
-  }
-
   #[test]
   fn test_partition_binaries() {
     // This test requires `which` to work correctly.
@@ -536,12 +885,11 @@ mod tests {
     // Let's assume 'cargo' (if building with cargo) and a non-existent binary.
     let cargo_exists = which::which("cargo").is_ok();
 
-    let mut bins_to_check = vec![Binary::new(
-      Cow::borrowed("hopefully_non_existent_binary_dsfargeg"),
-      Cow::borrowed("?"),
-    )];
+    let mut bins_to_check = vec![Binary::new(Cow::borrowed(
+      "hopefully_non_existent_binary_dsfargeg",
+    ))];
     if cargo_exists {
-      bins_to_check.push(Binary::new(Cow::borrowed("cargo"), Cow::borrowed("?")));
+      bins_to_check.push(Binary::new(Cow::borrowed("cargo")));
     }
 
     let (available, not_available) = partition_binaries(bins_to_check);
