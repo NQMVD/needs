@@ -1,11 +1,25 @@
-debug_build := "./target/debug/needs"
 release_build := "./target/release/needs"
 
 @_default:
     just --list
 
 @testlog:
-    cargo r -- -vvvv
+    clear
+    cargo r -- eza -vvvv
+    
+@test_cases:
+    clear
+    cd ./needsfiles/always_present && cargo r -- -vvvv
+    hr
+    cd ./needsfiles/builtins && cargo r -- -vvvv
+    hr
+    cd ./needsfiles/collection && cargo r -- -vvvv
+    hr
+    cd ./needsfiles/empty && cargo r -- -vvvv
+    hr
+    cd ./needsfiles/never_present && cargo r -- -vvvv
+    hr
+    cd ./needsfiles/non_existent && cargo r -- -vvvv || true
 
 @build:
     cargo build --release &> /dev/null
@@ -15,11 +29,11 @@ release_build := "./target/release/needs"
 
 @bench: build
     hyperfine '{{ release_build }}' '{{ release_build }} --no-version' '{{ release_build }} --quiet' \
-        -N --warmup 50 -M 500 -i --export-markdown report.md
+      -N --warmup 50 -M 500 -i --export-markdown report.md
 
 @bench_no_versions: build_no_versions
     hyperfine '{{ release_build }}' '{{ release_build }} --quiet' \
-        -N --warmup 50 -M 500 -i --export-markdown report.md
+      -N --warmup 50 -M 500 -i --export-markdown report.md
 
 @install:
     cargo install --path .
