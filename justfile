@@ -15,11 +15,11 @@ release_build := "./target/release/needs"
     hr
     cd ./needsfiles/collection && cargo r -- -vvvv
     hr
-    -mkdir ./needsfiles/empty
     -cd ./needsfiles/empty && cargo r -- -vvvv
     hr
     cd ./needsfiles/never_present && cargo r -- -vvvv
     hr
+    -mkdir ./needsfiles/non_existent
     -cd ./needsfiles/non_existent && cargo r -- -vvvv
     
 @test_all:
@@ -28,9 +28,9 @@ release_build := "./target/release/needs"
     cd ./needsfiles/always_present && cargo r
     cd ./needsfiles/builtins && cargo r
     cd ./needsfiles/collection && cargo r
-    -mkdir ./needsfiles/empty
     -cd ./needsfiles/empty && cargo r
     cd ./needsfiles/never_present && cargo r
+    -mkdir ./needsfiles/non_existent
     -cd ./needsfiles/non_existent && cargo r
 
 @build:

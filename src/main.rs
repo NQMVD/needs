@@ -108,10 +108,10 @@ fn known_binaries() -> Vec<Cow<'static, str>> {
     Cow::borrowed("echo"),
     Cow::borrowed("cat"),
     Cow::borrowed("find"),
-    Cow::borrowed("awk"), // not semver, just the date
+    Cow::borrowed("awk"), // no semver, just the date
     Cow::borrowed("sed"),
     Cow::borrowed("cut"),
-    Cow::borrowed("sort"), // 2.3-Apple (195)
+    //Cow::borrowed("sort"), // 2.3-Apple (195)
     Cow::borrowed("uniq"),
     Cow::borrowed("wc"),
     Cow::borrowed("head"),
@@ -248,12 +248,6 @@ fn partition_binaries(binaries_to_check: Vec<Binary<'_>>) -> (Vec<Binary<'_>>, V
 #[cfg(feature = "version-retrieval")]
 fn execute_binary<'a>(binary_name: &str) -> Option<Cow<'a, str>> {
   // TODO: log the frequency of these
-  // TODO: filter out known binaries that don't have a version
-  let known_binaries = known_binaries();
-  if known_binaries.iter().any(|b| b.as_ref() == binary_name) {
-    debug!(SCOPE = binary_name; "known binary, skipping version retrieval");
-    return None;
-  }
 
   let version_flags = ["--version", "-v", "-version", "-V"];
 
@@ -347,6 +341,14 @@ fn get_versions_for_bins(binaries: Vec<Binary>) -> Vec<Binary> {
   binaries
     .into_par_iter()
     .map(|binary| {
+      // filter out known binaries that don't have a version
+      if known_binaries().contains(&binary.name) {
+        return Binary {
+          name: binary.name,
+          version: None
+        };
+      }
+      
       let version = get_version(binary.name.clone());
       Binary {
         name: binary.name,
@@ -359,62 +361,63 @@ fn get_versions_for_bins(binaries: Vec<Binary>) -> Vec<Binary> {
 fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
   let mut bail_cause =
     "No valid needsfile found. Please provide a list of binaries or create a needsfile.";
-  match cli.bins.clone() {
+  let bins = match cli.bins.clone() {
     Some(bins) => {
       debug!(bins:debug = bins; "got bins from args");
-      let binaries: Vec<Binary> = bins
-        .iter()
-        // filter out empty strings
-        .filter(|name| !name.is_empty())
-        // filter out known binaries that don't have a version
-        .filter(|name| {
-          !known_binaries().iter().any(|b| {
-            if b.as_ref() == name.as_str() {
-              debug!(name = name.as_str(); "known binary, skipping version retrieval");
-              true
-            } else {
-              false
-            }
-          })
-        })
-        .map(|name| Binary::new(Cow::owned(name.clone())))
-        .collect::<Vec<Binary>>();
-      Ok(binaries)
+      bins
     }
     None => {
       debug!("no bins from args, trying to read from needsfiles");
       let file_paths = ["needsfile", ".needsfile", "needs", ".needs"];
+      let mut bins = Vec::new();
 
       for path in file_paths {
         // Attempt to read from the first successful file path
-        if let Ok(content) = std::fs::read_to_string(path) {
-          if content.trim().is_empty() {
-            bail_cause = "needsfile found but it is empty";
-            warn!(path = path; "needsfile found but it is empty, trying next.");
-            continue; // Try next file if this one is empty
+        let read_to_string = std::fs::read_to_string(path);
+        match read_to_string {
+          Ok(content) => {
+            if content.trim().is_empty() {
+              bail_cause = "needsfile found but it is empty";
+              warn!(path = path; "needsfile found but it is empty, trying next.");
+              continue; // Try next file if this one is empty
+            }
+            let names: Vec<String> = content.split_whitespace().map(|s| s.to_owned()).collect();
+            if names.is_empty() {
+              bail_cause = "needsfile found but it is empty";
+              warn!(path = path; "needsfile found but it is empty, trying next.");
+              continue; // Try next file if this one is empty
+            }
+
+            debug!(path:debug = path, binaries:debug = &names; "found needsfile");
+            bins.extend(names);
+            break;
           }
-          let names: Vec<String> = content.split_whitespace().map(|s| s.to_owned()).collect();
-          if names.is_empty() {
-            bail_cause = "needsfile found but it is empty";
-            warn!(path = path; "needsfile found but it is empty, trying next.");
-            continue; // Try next file if this one is empty
+          Err(_) => {
+            debug!(path = path; "Failed to read or find needsfile, trying next.");
           }
-          
-          debug!(path:debug = path, binaries:debug = &names; "found needsfile");
-          let binaries = names
-            .iter()
-            .map(|name_str| Binary::new(Cow::owned(name_str.clone())))
-            .collect::<Vec<Binary>>();
-          return Ok(binaries);
-        } else {
-          debug!(path = path; "Failed to read or find needsfile, trying next.");
         }
       }
-      // If no files were found or all were empty, return an error
-      warn!("No valid needsfile found");
-      bail!(bail_cause);
+      if bins.is_empty() {
+        warn!("No valid needsfile found");
+        bail!(bail_cause);
+      } else {
+        bins
+      }
     }
+  };
+
+  let binaries: Vec<Binary> = bins
+    .iter()
+    // filter out empty strings
+    .filter(|name| !name.is_empty())
+    .map(|name| Binary::new(Cow::owned(name.clone())))
+    .collect::<Vec<Binary>>();
+  
+  // LEAVE this here because sometimes collecting the binaries fails
+  if binaries.is_empty() {
+    error!(binaries:debug = &binaries; "binary collection failed");
   }
+  Ok(binaries)
 }
 
 fn sort_binaries(binaries: &mut Vec<Binary>) {
@@ -438,7 +441,7 @@ fn print_center_aligned(
         None => "?".to_string(),
       }
     };
-    println!("{}{} {}", padding, bin.name.bright_green(), version_display);
+    println!("{}{} {}", padding, bin.name.green(), version_display);
   }
   Ok(())
 }
@@ -637,7 +640,10 @@ fn main() -> Result<()> {
   // debug!("atty stdin: {}", is(Stream::Stdin));
 
   let binaries_from_source = match get_binary_names(&cli) {
-    Ok(it) => it,
+    Ok(bins) => {
+      debug!(binaries:debug = &bins; "got binaries from source");
+      bins
+    }
     Err(err) => {
       error!(error:display = err; "Error getting binaries");
       std::process::exit(1);
@@ -703,7 +709,7 @@ fn main() -> Result<()> {
       // Align "not found" with the names of "found" items.
       let padding_needed = global_max_name_len.saturating_sub(binary.name.len());
       let padding = " ".repeat(padding_needed);
-      println!("{}{} not found", padding, binary.name.bright_red());
+      println!("{}{} not found", padding, binary.name.red());
     }
   }
 

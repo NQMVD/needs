@@ -7,7 +7,6 @@ find
 awk
 sed
 cut
-sort
 uniq
 wc
 head
@@ -22,3 +21,4 @@ cp
 mv
 touch
 ssh
+nice
