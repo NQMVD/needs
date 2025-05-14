@@ -37,6 +37,8 @@ rayon = { version = "1.10.0", optional = true }
 regex = { version = "1.11.0", optional = true }
 xshell = { version = "0.2.7", optional = true }
 once_cell = { version = "1.21.3", optional = true }
+semver = "1.0.26"
+atty = "0.2.14"
 
 [profile.dev]
 split-debuginfo = "unpacked"

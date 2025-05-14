@@ -1,12 +1,17 @@
 #![allow(clippy::never_loop)] // because of the files that can vary depending on the system
+#![allow(unused_imports)]
 use anyhow::{Result, bail, ensure};
+use atty::{Stream, is};
 use beef::Cow;
 use chrono::Local;
 use clap::Parser;
 use colored::Colorize;
 use log::kv::*;
 use log::*;
-use std::{collections::BTreeMap, time::Instant};
+use std::{collections::BTreeMap, fmt::Display, time::Instant};
+// add semver
+use semver::{BuildMetadata, Prerelease, Version};
+// add miette
 
 #[cfg(feature = "version-retrieval")]
 use once_cell::sync::Lazy;
@@ -22,11 +27,12 @@ use xshell::{Shell, cmd};
 #[derive(Debug)]
 struct Binary<'a> {
   name: Cow<'a, str>,
-  version: Cow<'a, str>,
+  #[cfg(feature = "version-retrieval")]
+  version: Version,
 }
 
 impl<'a> Binary<'a> {
-  fn new(name: Cow<'a, str>, version: Cow<'a, str>) -> Self {
+  fn new(name: Cow<'a, str>, version: Version) -> Self {
     Self { name, version }
   }
 }
@@ -35,8 +41,24 @@ impl Default for Binary<'_> {
   fn default() -> Self {
     Self {
       name: Cow::borrowed(""),
-      version: Cow::borrowed("?"),
+      version: unknown_version(),
     }
+  }
+}
+
+impl Display for Binary<'_> {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{} {}", self.name, self.version)
+  }
+}
+
+fn unknown_version() -> Version {
+  Version {
+    major: 0,
+    minor: 0,
+    patch: 0,
+    pre: Prerelease::EMPTY,
+    build: BuildMetadata::new("unknown").unwrap(),
   }
 }
 
@@ -93,30 +115,67 @@ fn run_command_with_version<'a>(_binary_name: &str) -> Option<Cow<'a, str>> {
 }
 
 #[cfg(feature = "version-retrieval")]
-fn extract_version(output: Cow<str>) -> String {
-  static VERSION_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"v?(\d+\.\d+(?:\.\d+)?(?:[-+].+?)?)").unwrap());
+fn extract_version(output: Cow<str>) -> Result<Version> {
+  // 1.2.3 999.999.999 >1.2.3 >=1.2.3 =1.2.3 <1.2.3 1.2.3-nightly 1.2.3-alpha 1.2.3-beta
+  // TODO: implement
 
-  let mut version_to_return: String = "?".into();
-  let lines = output.lines().collect::<Vec<_>>();
+  let lines = output
+    .lines()
+    .filter(|l| l.chars().any(|c| c.is_ascii_digit()))
+    .collect::<Vec<_>>();
+
+  debug!(lines:debug = lines; "filtered lines:");
 
   for line in &lines {
-    if let Some(captures) = VERSION_REGEX.captures(line) {
-      if let Some(m) = captures.get(1) {
-        version_to_return = m.as_str().to_string();
-        let formatted_captures = captures
-          .iter()
-          .map(|c| c.map_or("".to_string(), |m| m.as_str().to_string()))
-          .collect::<Vec<_>>()
-          .join("\n");
-        debug!(captures = formatted_captures.as_str(), line = line; "version found");
+    // split on whitespace and filter again
+    let version_str = line
+      .split_whitespace()
+      .filter(|s| s.chars().any(|c| c.is_ascii_digit()))
+      .collect::<Vec<_>>()
+      .join(" ");
+    debug!(version_str = version_str.as_str(), line = line; "version candidate");
+
+    match Version::parse(version_str.as_str()) {
+      Ok(version) => {
+        debug!(version = version.to_string().as_str(), line = line; "version found");
+        return Ok(version); // Return the parsed version
       }
-      break;
+      Err(e) => {
+        debug!(error:display = e, line = line; "failed to parse version");
+        continue;
+      }
     }
   }
 
-  version_to_return // Return the extracted version or "?" at the end
+  // If we reach here, it means we didn't find a valid version
+  warn!(output = output.as_ref(); "No valid version found in the output");
+  bail!("No valid version found in the output");
 }
+
+// #[cfg(feature = "version-retrieval")]
+// fn parse_version(output: Cow<str>) -> String {
+//   let mut version_to_return: String = "?".into();
+//   let lines = output.lines().collect::<Vec<_>>();
+
+//   for line in &lines {
+//     // jump to first digit character
+//     let first_digit = line
+//       .chars()
+//       .position(|c| c.is_digit(10))
+//       .unwrap_or(line.len());
+//     match Version::parse(line) {
+//       Ok(version) => {
+//         debug!(version = version.to_string().as_str(), line = line; "version found");
+//       }
+//       Err(e) => {
+//         debug!(error:display = e, line = line; "failed to parse version");
+//         continue;
+//       }
+//     }
+//   }
+
+//   version_to_return // Return the extracted version or "?" at the end
+// }
 
 #[cfg(not(feature = "version-retrieval"))]
 fn extract_version(_output: Cow<str>) -> String {
@@ -128,7 +187,7 @@ fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
     Some(bins) => {
       let binaries: Vec<Binary> = bins
         .iter()
-        .map(|name| Binary::new(Cow::owned(name.clone()), Cow::borrowed("?")))
+        .map(|name| Binary::new(Cow::owned(name.clone()), unknown_version()))
         .collect::<Vec<Binary>>();
       Ok(binaries)
     }
@@ -152,7 +211,7 @@ fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
           );
           let binaries = names
             .iter()
-            .map(|name_str| Binary::new(Cow::owned(name_str.clone()), Cow::borrowed("?")))
+            .map(|name_str| Binary::new(Cow::owned(name_str.clone()), unknown_version()))
             .collect::<Vec<Binary>>();
           return Ok(binaries);
         } else {
@@ -184,8 +243,10 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
               "calling binary took"
           );
           debug!(
-            bin = binary.name.as_ref(), output = output.as_ref(); "command output");
-          Binary::new(binary.name, Cow::owned(extract_version(output)))
+            bin = binary.name.as_ref(), output = output.as_ref(); "command output for");
+          let version: Version = extract_version(output.clone());
+          // let version = parse_version(output.clone());
+          Binary::new(binary.name, version)
         }
         None => {
           debug!(
@@ -193,7 +254,7 @@ fn get_versions(binaries: Vec<Binary>) -> Vec<Binary> {
               ms = now.elapsed().as_millis();
               "calling binary took"
           );
-          Binary::new(binary.name, Cow::borrowed("?"))
+          Binary::new(binary.name, unknown_version())
         }
       }
     })
@@ -353,6 +414,14 @@ fn main() -> Result<()> {
 
   setup_logger(cli.verbosity).expect("Failed to set up logger");
 
+  debug!("Starting needs with verbosity level {}", cli.verbosity);
+  debug!("passed bins: {:?}", cli.bins);
+  debug!("quiet: {:?}", cli.quiet);
+  debug!("version retrieval: {:?}", cli.no_versions);
+  debug!("atty stdout: {}", is(Stream::Stdout));
+  debug!("atty stderr: {}", is(Stream::Stderr));
+  debug!("atty stdin: {}", is(Stream::Stdin));
+
   let binaries_from_source = get_binary_names(&cli)?;
   ensure!(!binaries_from_source.is_empty(), "binary sources are empty");
 
@@ -368,7 +437,9 @@ fn main() -> Result<()> {
   sort_binaries(&mut available);
   sort_binaries(&mut not_available);
 
-  if cli.quiet {
+  let stay_quiet = cli.quiet;
+
+  if stay_quiet {
     if !not_available.is_empty() {
       std::process::exit(1);
     }
@@ -432,17 +503,17 @@ mod tests {
   #[cfg(feature = "version-retrieval")]
   #[test]
   fn test_extract_version_feature_on() {
-    let output = "v1.2.3\n";
+    let output = "1.2.3\n";
     let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "1.2.3");
+    assert_eq!(version.to_string(), "1.2.3");
 
-    let output = "v100.200.300\n";
+    let output = "100.200.300\n";
     let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "100.200.300");
+    assert_eq!(version.to_string(), "100.200.300");
 
-    let output = "v1.2.3-nightly\n";
+    let output = "1.2.3-nightly\n";
     let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "1.2.3-n"); // Corrected assertion
+    assert_eq!(version.to_string(), "1.2.3-nightly");
   }
 
   #[cfg(feature = "version-retrieval")]
@@ -450,7 +521,7 @@ mod tests {
   fn test_extract_version_no_match_feature_on() {
     let output = "no version found\n";
     let version = extract_version(Cow::borrowed(output));
-    assert_eq!(version, "?");
+    assert_eq!(version.to_string(), "0.0.0+unknown");
   }
 
   #[cfg(not(feature = "version-retrieval"))]
@@ -538,10 +609,10 @@ mod tests {
 
     let mut bins_to_check = vec![Binary::new(
       Cow::borrowed("hopefully_non_existent_binary_dsfargeg"),
-      Cow::borrowed("?"),
+      unknown_version(),
     )];
     if cargo_exists {
-      bins_to_check.push(Binary::new(Cow::borrowed("cargo"), Cow::borrowed("?")));
+      bins_to_check.push(Binary::new(Cow::borrowed("cargo"), unknown_version()));
     }
 
     let (available, not_available) = partition_binaries(bins_to_check);
