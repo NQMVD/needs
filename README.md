@@ -121,13 +121,13 @@ flowchart TD
     E(Output)
     F(Exit)
     A(Start) --> B(Determine Binaries to check)
-    B -->|CLI Supply| C
-    B -->|File Supply| C
-    B -->|When None| F
-    C -->|Found| D(Version Retrieval)
-    C -->|Not Found| E
+    B -->|*CLI Supply*| C
+    B -->|*File Supply*| C
+    B -->|*When None*| F
+    C -->|*Found*| D(Version Retrieval)
+    C -->|*Not Found*| E
     D --> E
-    C -->|When Quiet OR NoVersions| F
+    C -->|*When Quiet OR NoVersions*| F
 ```
 
 ## Disclaimer & Insights on calling binaries
