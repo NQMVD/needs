@@ -201,6 +201,7 @@ pub fn execute_binary<'a>(binary_name: &str) -> Result<Cow<'a, str>> {
     match command.read() {
       Ok(output) => return Ok(Cow::owned(output)),
       Err(err) => {
+        trace!(SCOPE = binary_name, err:display = err; "flag didn't work, error for tracing:");
         debug!(SCOPE = binary_name, flag = flag; "flag didn't work, trying next...");
         // Continue trying other flags - we only report error if all flags fail
         continue;
@@ -464,7 +465,8 @@ mod tests {
     );
     if let Err(e) = version {
       let err_string = format!("{:?}", e);
-      assert!(err_string.contains("VersionParse"));
+      println!("Error string: {}", err_string);
+      assert!(err_string.contains("needs::version::parse_failed"));
     }
   }
 

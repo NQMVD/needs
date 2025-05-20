@@ -94,7 +94,8 @@ mod tests {
     if let Err(err) = result {
       // This is a bit of a hack to check the error type without direct access
       let err_string = format!("{:?}", err);
-      assert!(err_string.contains("NoBinariesSpecified"));
+      println!("Error string: {}", err_string);
+      assert!(err_string.contains("needs::discovery::no_binaries"));
     }
   }
 }
