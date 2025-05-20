@@ -117,28 +117,17 @@ cargo install needs --no-default-features
 
 ```mermaid
 flowchart TD
-    A[User submits request] --> B{Parse & determine intent}
-    B -->|Needs more info| C[Gather context (search, read files)]
-    B -->|Enough info| D[Plan actions]
-    C --> D
-    D --> E{Is action safe/allowed?}
-    E -->|No| F[Ask user for clarification]
-    E -->|Yes| G[Perform actions (edit, create, delete, etc.)]
-    G --> H{Diagnostics needed?}
-    H -->|Yes| I[Run diagnostics/tests]
-    H -->|No| J[Present results to user]
-    I --> K{Errors found?}
-    K -->|Yes| L[Attempt fix or ask user]
-    K -->|No| J
-    F --> J
-    L --> J
-    J --> M[End / Await next request]
-
-    %% Styling for clarity
-    classDef user fill:#e0f7fa,stroke:#00796b,stroke-width:2px;
-    classDef system fill:#fffde7,stroke:#fbc02d,stroke-width:2px;
-    class A user;
-    class B,C,D,E,G,H,I,K,L,F,J,M system;
+    C(Discovery)
+    E(Output)
+    F(Exit)
+    A(Start) --> B(Determine Binaries to check)
+    B -->|CLI Supply| C
+    B -->|File Supply| C
+    B -->|When None| F
+    C -->|Found| D(Version Retrieval)
+    C -->|Not Found| E
+    D --> E
+    C -->|When Quiet OR NoVersions| F
 ```
 
 ## Disclaimer & Insights on calling binaries
