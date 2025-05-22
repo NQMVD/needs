@@ -2,6 +2,8 @@
 <img align="right" src="https://github.com/NQMVD/needs/blob/master/icon.svg?raw=true" height="120px" alt="icon"/>
 
 ![](https://img.shields.io/github/last-commit/NQMVD/needs?&style=for-the-badge&color=b1ffb4&logoColor=D9E0EE&labelColor=292324)  
+[![Visitors](https://api.visitorbadge.io/api/combined?path=https%3A%2F%2Fcrates.io%2Fcrates%2Fneeds&label=crates.io%20Visitors&labelColor=%232a2325&countColor=%23263759&style=flat-square&labelStyle=upper)](https://visitorbadge.io/status?path=https%3A%2F%2Fcrates.io%2Fcrates%2Fneeds)
+[![Visitors](https://api.visitorbadge.io/api/combined?path=https%3A%2F%2Fgithub.com%2FNQMVD%2Fneeds&label=Repo%20Visitors&labelColor=%232a2325&countColor=%23263759&style=flat-square&labelStyle=upper)](https://visitorbadge.io/status?path=https%3A%2F%2Fgithub.com%2FNQMVD%2Fneeds)  
 
 <h4>Check if given bin(s) are available on your system and, optionally, get their version.</h4>
 <i>...multi-threaded of course..</i>
@@ -25,11 +27,11 @@ made with:
 ### Screenshots
 > using cli args
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/screenshot.png?raw=true" height="420px" alt="screenshot"/>
+<img src="https://github.com/NQMVD/needs/blob/master/images/screenshot.png?raw=true" alt="screenshot"/>
 
 > using needsfile
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/screenshot_file.png?raw=true" height="520px" alt="screenshot_file"/>
+<img src="https://github.com/NQMVD/needs/blob/master/images/screenshot_file.png?raw=true" alt="screenshot_file"/>
 
 ### Showcase
 
@@ -41,15 +43,15 @@ Here are [freeze](https://github.com/charmbracelet/freeze)-generated screenshots
 
 > just `needs`
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/needs_latest.png?raw=true" height="380px" alt="needs_latest"/>  
+<img src="https://github.com/NQMVD/needs/blob/master/images/needs_latest.png?raw=true" width="480px" alt="needs_latest"/>  
 
 > `needs --no-versions` to skip version retrieval
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/needs_no_versions.png?raw=true" height="380px" alt="needs_no_versions"/>
+<img src="https://github.com/NQMVD/needs/blob/master/images/needs_no_versions.png?raw=true" width="480px" alt="needs_no_versions"/>
 
 > `needs -vvv` to see what's going on
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/needs_log.png?raw=true" height="660px" alt="needs_log"/>
+<img src="https://github.com/NQMVD/needs/blob/master/images/needs_log.png?raw=true" width="720px" alt="needs_log"/>
 
 This logging output was hand crafted with _(heavy)_ inspiration from [charm/log](https://github.com/charmbracelet/log) building on [env_logger](https://crates.io/crates/env_logger).  
 Ironically not because of the env-part of it, but because it feels like the simplest wrapper of std::log and it supports key-value-pairs which were very important to me.  
@@ -110,11 +112,19 @@ cargo install needs --no-default-features
 
 #### other
 - [ ] integrate tests and screenshot generation with workflows
+- [ ] better release workflow
+- [ ] seperate out the logging part into a separate lib
+- [ ] seperate crates.io README from the github one
 
 <h1>
 
 </h1>
 
+## Insights
+
+Here's a detailed explanation of how needs works on [deepwiki](https://deepwiki.com/NQMVD/needs)
+
+And here's a flowchart of the process:
 ```mermaid
 flowchart TD
     C(Discovery)
@@ -126,11 +136,12 @@ flowchart TD
     B -->|*When None*| F
     C -->|*Found*| D(Version Retrieval)
     C -->|*Not Found*| E
-    D --> E
     C -->|*When Quiet OR NoVersions*| F
+    D --> E
+    E --> F
 ```
 
-## Disclaimer & Insights on calling binaries
+## Disclaimer on calling binaries
 ### potential modifications
 > [!IMPORTANT]
 > Keep in mind that needs runs the programs you give it.
@@ -162,7 +173,7 @@ binaries which will _not_ be called to retrieve their version.
 To identify long running binaries, you can use the verbose flag to increase the logging level, which when reached TRACE (-vvvv) shows the timings for the individual binaries.  
 If you also find poorly optimized programs, just create an issue so i can keep track of them, but you could also just notify the developer and tell him to stop using javascript for big terminal tools :)
 
-## speed
+### speed
 As before mentioned, the speed of the program depends on the called binaries if run with version retrieval.  
 The speed of the program itself is actually quite fast, see the `report.md` for the results of a benchmark.  
 The benchmark was done with the `hyperfine` program, run on a M4 Macbook Pro.
