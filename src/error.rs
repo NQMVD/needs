@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use miette::{Diagnostic, NamedSource, SourceSpan};
+use std::path::PathBuf;
 use thiserror::Error;
 
 #[derive(Error, Debug, Diagnostic)]

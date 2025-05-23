@@ -7,10 +7,11 @@ use log::{debug, error, warn};
 use miette::Result;
 use std::path::PathBuf;
 
+// TODO: refactor this, maybe split it up
 pub fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
   let mut bail_cause =
     "No valid needsfile found.\nPlease provide a list of binaries or create a needsfile.";
-  let bins = match cli.bins.clone() {
+  let mut bins = match cli.bins.clone() {
     Some(bins) => {
       debug!(bins:debug = bins; "got bins from args");
       bins
@@ -44,7 +45,7 @@ pub fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
         }
       }
       if bins.is_empty() {
-        warn!("No valid needsfile found");
+        error!("No valid needsfile found");
         return Err(IoError::NeedsfileMissing.into());
       } else {
         bins
@@ -52,6 +53,9 @@ pub fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
     }
   };
 
+  bins.sort();
+  bins.dedup();
+  
   let binaries: Vec<Binary> = bins
     .iter()
     .filter(|name| !name.is_empty())

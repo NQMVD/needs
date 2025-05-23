@@ -188,7 +188,7 @@ pub fn execute_binary<'a>(binary_name: &str) -> Result<Cow<'a, str>> {
         return Err(
           VersionError::Execution {
             name: binary_name.to_string(),
-            source: std::io::Error::new(std::io::ErrorKind::Other, e),
+            source: std::io::Error::other(e),
           }
           .into(),
         );

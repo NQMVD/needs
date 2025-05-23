@@ -30,7 +30,7 @@ pub fn partition_binaries(
           return Err(
             DiscoveryError::BinaryCheck {
               name: name.to_string(),
-              source: std::io::Error::new(std::io::ErrorKind::Other, err),
+              source: std::io::Error::other(err),
             }
             .into(),
           );

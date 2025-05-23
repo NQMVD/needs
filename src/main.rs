@@ -23,7 +23,6 @@ use crate::error::{AppError, DiscoveryError};
 fn main() -> Result<()> {
   miette::set_panic_hook();
   let cli = cli::Cli::parse();
-
   logging::setup_logger(cli.verbosity)?;
 
   debug!("Starting needs with verbosity level {}", cli.verbosity);
@@ -44,13 +43,7 @@ fn main() -> Result<()> {
   // debug!("atty stdin: {}", is(Stream::Stdin));
 
   // TODO: split this up
-  let binaries_from_source: Vec<Binary<'_>> = match io::get_binary_names(&cli) {
-    Ok(bins) => bins,
-    Err(err) => {
-      error!(error:display = err; "Error getting binaries");
-      return Err(err);
-    }
-  };
+  let binaries_from_source: Vec<Binary<'_>> = io::get_binary_names(&cli)?;
   if binaries_from_source.is_empty() {
     error!("No binaries found, binary sources are empty");
     return Err(DiscoveryError::NoBinariesSpecified.into());
@@ -77,8 +70,8 @@ fn main() -> Result<()> {
     std::process::exit(0);
   }
 
-  sort_binaries(&mut available);
-  sort_binaries(&mut not_available);
+  available.sort();
+  not_available.sort();
 
   let needs_separator = !available.is_empty() && !not_available.is_empty();
 

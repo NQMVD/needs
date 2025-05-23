@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 use crate::versions::{format_version, unknown_version};
 
-#[derive(Debug)]
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Binary<'a> {
   pub name: Cow<'a, str>,
   // TODO: use a custom version type
@@ -41,6 +41,13 @@ impl Display for Binary<'_> {
         format_version(self.version.as_ref().unwrap(), false)
       )
     }
+  }
+}
+
+// impl sort for binary
+impl Binary<'_> {
+  fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    self.name.cmp(&other.name)
   }
 }
 
