@@ -3,14 +3,17 @@ release_build := "./target/release/needs"
 @_default:
     just --list
     needs gum freeze hr
-    
+
+@gif:
+    agg demo.cast --font-family "JetBrainsMono Nerd Font Mono" --speed 2 demo.gif
+
 @work:
-  just test
-  hr
-  just bench
-  hr
-  just freeze-all
-  gum log -l "info" "All tasks have been completed."
+    just test
+    hr
+    just bench
+    hr
+    just freeze-all
+    gum log -l "info" "All tasks have been completed."
 
 @test-cases:
     clear

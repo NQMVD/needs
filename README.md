@@ -26,7 +26,9 @@ made with:
 
 ### Showcase
 
-[![asciicast](https://asciinema.org/a/720569.svg)](https://asciinema.org/a/720569)
+![gif](https://github.com/NQMVD/needs/blob/master/demo.gif?raw=true)
+
+[asciicast](https://asciinema.org/a/720569)
 
 Here are [freeze](https://github.com/charmbracelet/freeze)-generated screenshots of the latest version:
 
