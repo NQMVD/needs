@@ -7,6 +7,10 @@ release_build := "./target/release/needs"
 @gif:
     agg demo.cast --font-family "JetBrainsMono Nerd Font Mono" --speed 2 demo.gif
 
+@release:
+    git checkout master
+    release-plz update
+
 @work:
     just test
     hr
