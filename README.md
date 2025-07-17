@@ -67,6 +67,16 @@ For now it will just reside inside of needs, but in the future I'm planning on m
 </h1>
 
 ### Installation
+
+#### Via Homebrew (macOS and Linux)
+```bash
+# Install from local formula
+git clone https://github.com/NQMVD/needs.git
+cd needs
+brew install --build-from-source ./needs.rb
+```
+
+#### Via Cargo
 ```bash
 cargo install needs
 ```
