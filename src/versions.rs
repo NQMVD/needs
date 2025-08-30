@@ -317,6 +317,7 @@ pub fn get_versions_for_bins(binaries: Vec<Binary>) -> Vec<Binary> {
         return Binary {
           name: binary.name,
           version: None,
+          package_manager: binary.package_manager,
         };
       }
 
@@ -332,6 +333,7 @@ pub fn get_versions_for_bins(binaries: Vec<Binary>) -> Vec<Binary> {
       Binary {
         name: binary.name,
         version,
+        package_manager: binary.package_manager,
       }
     })
     .collect()
