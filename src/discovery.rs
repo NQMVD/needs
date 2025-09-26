@@ -9,23 +9,29 @@ fn detect_package_manager(binary_path: &Path) -> Option<String> {
   let path_str = binary_path.to_string_lossy();
   let path_str_lower = path_str.to_lowercase();
 
-  // Check for rustup/cargo
-  if path_str_lower.contains("/.cargo/bin/") || path_str_lower.contains("/.rustup/") {
+  // Check if it's a cargo binary specifically
+  if path_str_lower.contains("/.cargo/bin/") {
+    return Some("cargo".to_string());
+  }
+  // Check if it's other rustup toolchain binaries
+  if path_str_lower.contains("/.rustup/") {
     return Some("rustup".to_string());
   }
 
   // Check for Homebrew (macOS/Linux)
-  if path_str_lower.starts_with("/opt/homebrew/") || 
-     path_str_lower.starts_with("/usr/local/cellar/") ||
-     (path_str_lower.contains("/usr/local/") && path_str_lower.contains("homebrew")) {
+  if path_str_lower.starts_with("/opt/homebrew/")
+    || path_str_lower.starts_with("/usr/local/cellar/")
+    || (path_str_lower.contains("/usr/local/") && path_str_lower.contains("homebrew"))
+  {
     return Some("homebrew".to_string());
   }
 
   // Check for npm global installs
-  if path_str_lower.contains("/node_modules/.bin/") || 
-     path_str_lower.contains("/npm/") ||
-     path_str_lower.contains("/.npm/") ||
-     path_str_lower.contains("/npm-global/") {
+  if path_str_lower.contains("/node_modules/.bin/")
+    || path_str_lower.contains("/npm/")
+    || path_str_lower.contains("/.npm/")
+    || path_str_lower.contains("/npm-global/")
+  {
     return Some("npm".to_string());
   }
 
@@ -35,37 +41,55 @@ fn detect_package_manager(binary_path: &Path) -> Option<String> {
   }
 
   // Check for Python pip/pipx installs
-  if path_str_lower.contains("/.local/bin/") ||
-     path_str_lower.contains("/python") ||
-     path_str_lower.contains("/pip/") ||
-     path_str_lower.contains("/pipx/") {
+  if path_str_lower.contains("/.local/bin/")
+    || path_str_lower.contains("/python")
+    || path_str_lower.contains("/pip/")
+    || path_str_lower.contains("/pipx/")
+  {
     return Some("pip".to_string());
   }
 
+  // DEV: adding ? to these because i havnt tested them yet
   // Check for snap packages
   if path_str_lower.contains("/snap/") {
-    return Some("snap".to_string());
+    return Some("snap?".to_string());
   }
 
   // Check for flatpak
   if path_str_lower.contains("/flatpak/") {
-    return Some("flatpak".to_string());
+    return Some("flatpak?".to_string());
   }
 
   // Check for AppImage
   if path_str_lower.contains("/appimage/") || path_str_lower.ends_with(".appimage") {
-    return Some("appimage".to_string());
+    return Some("appimage?".to_string());
+  }
+
+  // check for bun
+  if path_str_lower.contains("/bun/") || path_str_lower.contains("/.bun/") {
+    return Some("bun".to_string());
+  }
+
+  // check for deno
+  if path_str_lower.contains("/deno/") || path_str_lower.contains("/.deno/") {
+    return Some("deno".to_string());
+  }
+
+  // check for yarn
+  if path_str_lower.contains("/yarn/") || path_str_lower.contains("/.yarn/") {
+    return Some("yarn".to_string());
   }
 
   // Check for system package managers (dpkg/apt on Debian/Ubuntu, etc.)
   // This should be last as it's the most generic
-  if path_str_lower.starts_with("/usr/bin/") || 
-     path_str_lower.starts_with("/bin/") ||
-     path_str_lower.starts_with("/usr/local/bin/") ||
-     path_str_lower.starts_with("/sbin/") ||
-     path_str_lower.starts_with("/usr/sbin/") {
-    return Some("system".to_string());
-  }
+  // if path_str_lower.starts_with("/usr/bin/")
+  //   || path_str_lower.starts_with("/bin/")
+  //   || path_str_lower.starts_with("/usr/local/bin/")
+  //   || path_str_lower.starts_with("/sbin/")
+  //   || path_str_lower.starts_with("/usr/sbin/")
+  // {
+  //   return Some("system".to_string());
+  // }
 
   None
 }
@@ -99,7 +123,7 @@ pub fn partition_binaries(
           return Err(
             DiscoveryError::BinaryCheck {
               name: name.to_string(),
-              source: std::io::Error::new(std::io::ErrorKind::Other, err),
+              source: std::io::Error::other(err),
             }
             .into(),
           );
@@ -122,7 +146,7 @@ mod tests {
     // Test rustup/cargo detection
     assert_eq!(
       detect_package_manager(Path::new("/home/user/.cargo/bin/cargo")),
-      Some("rustup".to_string())
+      Some("cargo".to_string())
     );
     assert_eq!(
       detect_package_manager(Path::new("/home/user/.rustup/toolchains/stable/bin/rustc")),
@@ -130,14 +154,8 @@ mod tests {
     );
 
     // Test system package detection
-    assert_eq!(
-      detect_package_manager(Path::new("/usr/bin/grep")),
-      Some("system".to_string())
-    );
-    assert_eq!(
-      detect_package_manager(Path::new("/bin/ls")),
-      Some("system".to_string())
-    );
+    assert_eq!(detect_package_manager(Path::new("/usr/bin/grep")), None);
+    assert_eq!(detect_package_manager(Path::new("/bin/ls")), None);
 
     // Test homebrew detection
     assert_eq!(
@@ -194,7 +212,7 @@ mod tests {
       assert_eq!(available[0].name, "cargo");
       // Check that package manager was detected
       assert!(available[0].package_manager.is_some());
-      assert_eq!(available[0].package_manager.as_ref().unwrap(), "rustup");
+      assert_eq!(available[0].package_manager.as_ref().unwrap(), "cargo");
       assert_eq!(not_available.len(), 1);
       assert_eq!(
         not_available[0].name,

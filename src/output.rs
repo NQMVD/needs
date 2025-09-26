@@ -16,7 +16,7 @@ pub fn print_center_aligned(
     let padding = " ".repeat(padding_needed);
     let version_display = if always_found {
       if let Some(ref pm) = bin.package_manager {
-        format!("found ({})", pm)
+        format!("found {}", format!("via {}", pm).dimmed())
       } else {
         "found".to_string()
       }
@@ -25,14 +25,14 @@ pub fn print_center_aligned(
         Some(ref version) => {
           let version_str = format!("{}", format_version(version, full_versions));
           if let Some(ref pm) = bin.package_manager {
-            format!("{} ({})", version_str, pm)
+            format!("{} {}", version_str, format!("via {}", pm).dimmed())
           } else {
             version_str
           }
         }
         None => {
           if let Some(ref pm) = bin.package_manager {
-            format!("? ({})", pm)
+            format!("? {}", format!("via {}", pm).dimmed())
           } else {
             "?".to_string()
           }
@@ -50,7 +50,7 @@ pub fn print_center_aligned(binaries: Vec<Binary>, max_len: usize) -> Result<()>
     let padding_needed = max_len.saturating_sub(bin.name.len());
     let padding = " ".repeat(padding_needed);
     let display_text = if let Some(ref pm) = bin.package_manager {
-      format!("found ({})", pm)
+      format!("found {}", format!("via {}", pm).dimmed())
     } else {
       "found".to_string()
     };
