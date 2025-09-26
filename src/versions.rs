@@ -188,7 +188,7 @@ pub fn execute_binary<'a>(binary_name: &str) -> Result<Cow<'a, str>> {
         return Err(
           VersionError::Execution {
             name: binary_name.to_string(),
-            source: std::io::Error::new(std::io::ErrorKind::Other, e),
+            source: std::io::Error::other(e),
           }
           .into(),
         );
@@ -317,6 +317,7 @@ pub fn get_versions_for_bins(binaries: Vec<Binary>) -> Vec<Binary> {
         return Binary {
           name: binary.name,
           version: None,
+          package_manager: binary.package_manager,
         };
       }
 
@@ -332,6 +333,7 @@ pub fn get_versions_for_bins(binaries: Vec<Binary>) -> Vec<Binary> {
       Binary {
         name: binary.name,
         version,
+        package_manager: binary.package_manager,
       }
     })
     .collect()

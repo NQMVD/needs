@@ -2,7 +2,7 @@ release_build := "./target/release/needs"
 
 @_default:
     just --list
-    needs gum freeze hr
+    needs gum freeze hr agg
 
 @gif:
     agg demo.cast --font-family "JetBrainsMono Nerd Font Mono" --speed 2 demo.gif
