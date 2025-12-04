@@ -1,10 +1,6 @@
 name: Package and Publish
 
 on:
-  push:
-    branches:
-      - master
-      - release/*
   workflow_dispatch:
 
 permissions:

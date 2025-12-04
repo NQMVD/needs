@@ -9,6 +9,7 @@ pub struct Binary<'a> {
   pub name: Cow<'a, str>,
   // TODO: use a custom version type
   pub version: Option<SemVersion>,
+  pub package_manager: Option<String>,
 }
 
 impl<'a> Binary<'a> {
@@ -16,6 +17,15 @@ impl<'a> Binary<'a> {
     Self {
       name,
       version: None,
+      package_manager: None,
+    }
+  }
+
+  pub fn new_with_package_manager(name: Cow<'a, str>, package_manager: Option<String>) -> Self {
+    Self {
+      name,
+      version: None,
+      package_manager,
     }
   }
 }
@@ -25,6 +35,7 @@ impl Default for Binary<'_> {
     Self {
       name: Cow::borrowed(""),
       version: Some(unknown_version()),
+      package_manager: None,
     }
   }
 }
@@ -32,14 +43,18 @@ impl Default for Binary<'_> {
 impl Display for Binary<'_> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     if self.version.is_none() {
-      write!(f, "{} ?", self.name)
+      if let Some(ref pm) = self.package_manager {
+        write!(f, "{} ? ({})", self.name, pm)
+      } else {
+        write!(f, "{} ?", self.name)
+      }
     } else {
-      write!(
-        f,
-        "{} {}",
-        self.name,
-        format_version(self.version.as_ref().unwrap(), false)
-      )
+      let version_str = format_version(self.version.as_ref().unwrap(), false);
+      if let Some(ref pm) = self.package_manager {
+        write!(f, "{} {} ({})", self.name, version_str, pm)
+      } else {
+        write!(f, "{} {}", self.name, version_str)
+      }
     }
   }
 }

@@ -28,7 +28,13 @@ pub fn get_binary_names<'a>(cli: &Cli) -> Result<Vec<Binary<'a>>> {
               warn!(path = path; "needsfile found but it is empty, trying next.");
               continue; // Try next file if this one is empty
             }
-            let names: Vec<String> = content.split_whitespace().map(|s| s.to_owned()).collect();
+            let names = match crate::parser::parse_needsfile(&content) {
+              Ok(names) => names,
+              Err(e) => {
+                warn!(path = path, error:display = e; "Failed to parse needsfile, trying next.");
+                continue;
+              }
+            };
             if names.is_empty() {
               warn!(path = path; "needsfile found but it is empty, trying next.");
               continue; // Try next file if this one is empty

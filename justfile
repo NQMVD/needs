@@ -2,7 +2,7 @@ release_build := "./target/release/needs"
 
 @_default:
     just --list
-    needs gum freeze hr
+    needs gum freeze hr termframe resvg agg
 
 @gif:
     agg demo.cast --font-family "JetBrainsMono Nerd Font Mono" --speed 2 demo.gif
@@ -17,39 +17,50 @@ release_build := "./target/release/needs"
 
 @test-cases:
     clear
-    cd ./needsfiles/always_present && cargo r -- -vvvv
+    cd ./needsfiles/always_present && ./target/release/needs -- -vvvv
     hr
-    cd ./needsfiles/builtins && cargo r -- -vvvv
+    cd ./needsfiles/builtins && ./target/release/needs -- -vvvv
     hr
-    cd ./needsfiles/collection && cargo r -- -vvvv
+    cd ./needsfiles/collection && ./target/release/needs -- -vvvv
     hr
-    -cd ./needsfiles/empty && cargo r -- -vvvv
+    -cd ./needsfiles/empty && ./target/release/needs -- -vvvv
     hr
-    cd ./needsfiles/never_present && cargo r -- -vvvv
+    cd ./needsfiles/never_present && ./target/release/needs -- -vvvv
     hr
     -mkdir ./needsfiles/non_existent
-    -cd ./needsfiles/non_existent && cargo r -- -vvvv
+    -cd ./needsfiles/non_existent && ./target/release/needs -- -vvvv
 
-test:
+test: build
     cargo clippy
-    cargo clippy --no-default-features
     cargo test
-    cargo test --no-default-features
-    cargo run
-    cargo run --no-default-features
-    cargo run -- grep -q
-    cargo run --no-default-features -- grep -q
-    -cargo run -- ADFBHYNIL -q
-    -cargo run --no-default-features -- ADFBHYNIL -q
-    cargo run -- -n
-    -cargo run --no-default-features -- -n
-    cd ./needsfiles/always_present && cargo r
-    cd ./needsfiles/builtins && cargo r
-    cd ./needsfiles/collection && cargo r
-    -cd ./needsfiles/empty && cargo r
-    cd ./needsfiles/never_present && cargo r
+    ./target/release/needs
+    ./target/release/needs grep -q
+    -./target/release/needs ADFBHYNIL -q
+    ./target/release/needs -n
+    cd ./needsfiles/always_present && ../../target/release/needs
+    cd ./needsfiles/builtins && ../../target/release/needs
+    cd ./needsfiles/collection && ../../target/release/needs
+    -cd ./needsfiles/empty && ../../target/release/needs
+    cd ./needsfiles/never_present && ../../target/release/needs
     @-mkdir ./needsfiles/non_existent
-    -cd ./needsfiles/non_existent && cargo r
+    -cd ./needsfiles/non_existent && ../../target/release/needs -q
+    @hr
+    @gum log -l "info" "All tests passed."
+
+test-no-versions: build-no-versions
+    cargo clippy --no-default-features
+    cargo test --no-default-features
+    ./target/release/needs
+    ./target/release/needs grep -q
+    -./target/release/needs ADFBHYNIL -q
+    ./target/release/needs -n
+    cd ./needsfiles/always_present && ../../target/release/needs
+    cd ./needsfiles/builtins && ../../target/release/needs
+    cd ./needsfiles/collection && ../../target/release/needs
+    -cd ./needsfiles/empty && ../../target/release/needs
+    cd ./needsfiles/never_present && ../../target/release/needs
+    @-mkdir ./needsfiles/non_existent
+    -cd ./needsfiles/non_existent && ../../target/release/needs -q
     @hr
     @gum log -l "info" "All tests passed."
 
@@ -76,20 +87,56 @@ test:
 @install-from-cratesio:
     cargo install needs
 
-@freeze-all: install freeze-latest freeze-no-versions freeze-help freeze-log
+@run-from-pkgx:
+    pkgx needs --version
+
+@freeze-all: freeze-latest freeze-no-versions freeze-help freeze-log
     gum log -l "info" "All images have been generated."
 
+# @freeze cmd path:
+#     gum spin --show-output --show-error --title="Freezing: '{{ cmd }}' to {{ path }}" -- freeze -c full -w 95 -x "{{ cmd }}" -o "{{ path }}"
+
+# @freeze cmd path:
+#     gum spin --show-output --show-error --title="Freezing:  '{{ cmd }}' to {{ path }}" -- \
+#         termframe \
+#         -W 95 \
+#         --window-style "new-macos" \
+#         --theme "vepser" \
+#         --font-family "JetBrains Mono" \
+#         --embed-fonts true \
+#         -o "{{ path }}.svg" -- {{ cmd }}
+#     gum spin --show-output --show-error --title="Rendering: '{{ cmd }}' to {{ path }}" -- \
+#         resvg \
+#         --zoom 4 \
+#         --dpi 144 \
+#         --use-font-file "/Users/noah/Library/Fonts/BerkeleyMonoVariable-Regular.ttf
+#         --font-family "Berkeley Mono Variable" \
+#         --monospace-family "Berkeley Mono Variable" \
+#         --font-size 16 \
+#         "{{ path }}.svg" "{{ path }}.png"
+
 @freeze cmd path:
-    gum spin --show-output --show-error --title="Freezing: '{{ cmd }}' to {{ path }}" -- freeze -c full -w 95 -x "{{ cmd }}" -o "{{ path }}"
+    gum spin --show-output --show-error --title="Freezing:  '{{ cmd }}' to {{ path }}" -- \
+        termframe \
+        -W 95 \
+        --window-style "new-macos" \
+        --theme "vepser" \
+        -o "{{ path }}.svg" -- {{ cmd }}
+    gum spin --show-output --show-error --title="Rendering: '{{ cmd }}' to {{ path }}" -- \
+        resvg \
+        --zoom 4 \
+        --dpi 144 \
+        --font-size 16 \
+        "{{ path }}.svg" "{{ path }}.png"
 
 @freeze-help:
-    just freeze "needs --help" "images/needs_help.png"
+    just freeze "needs --help" "images/needs_help"
 
 @freeze-latest:
-    just freeze needs "images/needs_latest.png"
+    just freeze needs "images/needs_latest"
 
 @freeze-no-versions:
-    just freeze "needs --no-versions" "images/needs_no_versions.png"
+    just freeze "needs --no-versions" "images/needs_no_versions"
 
 @freeze-log:
-    just freeze "needs -vvv" "images/needs_log.png"
+    just freeze "needs -vvv" "images/needs_log"

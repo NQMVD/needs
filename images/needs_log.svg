@@ -1,0 +1,197 @@
+<svg height="869.6" width="767.2" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(32,16)">
+<filter filterUnits="userSpaceOnUse" height="877.6" id="shadow" width="775.2" x="-32" y="-24">
+<feGaussianBlur stdDeviation="12"/>
+</filter>
+<rect fill="#000000c0" filter="url(#shadow)" height="805.6" rx="12" ry="12" width="703.2" x="4" y="12"/>
+<rect fill="#101010" height="805.6" rx="12" ry="12" width="703.2"/>
+<clipPath id="header">
+<rect height="28" width="703.2"/>
+</clipPath>
+<rect clip-path="url(#header)" fill="#101010" height="56" rx="12" ry="12" width="703.2"/>
+<line stroke="#000000c0" stroke-width="0.5" x1="0" x2="703.2" y1="28" y2="28"/><text dominant-baseline="central" fill="#b3b3b3" font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="351.6" y="14">needs -vvv</text>
+<g>
+<circle cx="14" cy="14" fill="#ff5f56" r="6" stroke="#ff5f56" stroke-width="0.5"/>
+<circle cx="34" cy="14" fill="#ffbd2e" r="6" stroke="#ffbd2e" stroke-width="0.5"/>
+<circle cx="54" cy="14" fill="#28c941" r="6" stroke="#28c941" stroke-width="0.5"/>
+</g>
+<svg class="terminal" font-family="JetBrains Mono, Fira Code, Source Code Pro, Cascadia Code, Consolas, Menlo, Monaco, DejaVu Sans Mono, monospace, Symbols Nerd Font Mono" font-size="12" height="777.6" width="703.2" y="28">
+<svg fill="#a0a0a0" x="9.6" y="7.2">
+<g>
+<svg height="763.2" viewBox="0 0 57 63.6" width="684">
+<g stroke-width="0.025"/>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="0">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">Starting </tspan><tspan fill="#a0a0a0">needs </tspan><tspan fill="#a0a0a0">with </tspan><tspan fill="#a0a0a0">verbosity </tspan><tspan fill="#a0a0a0">level </tspan><tspan fill="#a0a0a0">3 </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="14.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">passed </tspan><tspan fill="#a0a0a0">bins: </tspan><tspan fill="#a0a0a0">None </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="28.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">quiet: </tspan><tspan fill="#a0a0a0">false </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="43.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">Version </tspan><tspan fill="#a0a0a0">retrieval </tspan><tspan fill="#a0a0a0">enabled. </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="57.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">No </tspan><tspan fill="#a0a0a0">versions </tspan><tspan fill="#a0a0a0">flag: </tspan><tspan fill="#a0a0a0">false </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="72">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">Full </tspan><tspan fill="#a0a0a0">versions </tspan><tspan fill="#a0a0a0">flag: </tspan><tspan fill="#a0a0a0">false </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="86.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">no </tspan><tspan fill="#a0a0a0">bins </tspan><tspan fill="#a0a0a0">from </tspan><tspan fill="#a0a0a0">args, </tspan><tspan fill="#a0a0a0">trying </tspan><tspan fill="#a0a0a0">to </tspan><tspan fill="#a0a0a0">read </tspan><tspan fill="#a0a0a0">from </tspan><tspan fill="#a0a0a0">needsfiles </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="100.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">found </tspan><tspan fill="#a0a0a0">needsfile </tspan><tspan fill="#8e8e8e">binaries=</tspan><tspan fill="#a0a0a0">["eza", </tspan><tspan fill="#a0a0a0">"bat", </tspan><tspan fill="#a0a0a0">"btm", </tspan><tspan fill="#a0a0a0">"needs", </tspan><tspan fill="#a0a0a0">"luajit", </tspan><tspan fill="#a0a0a0">"grep", </tspan><tspan fill="#a0a0a0">"fd", </tspan><tspan fill="#a0a0a0">"aw</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="115.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">k", </tspan><tspan fill="#a0a0a0">"idnvus"] </tspan><tspan fill="#8e8e8e">path=</tspan><tspan fill="#a0a0a0">"needsfile" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="129.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">eza </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="144">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">bat </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="158.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">btm </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="172.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">needs </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="187.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">luajit </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="201.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">grep </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="216">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">fd </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="230.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">awk </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="244.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">which</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">not </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">bin=</tspan><tspan fill="#a0a0a0">idnvus </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="259.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">luajit</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">flag </tspan><tspan fill="#a0a0a0">didn't </tspan><tspan fill="#a0a0a0">work, </tspan><tspan fill="#a0a0a0">trying </tspan><tspan fill="#a0a0a0">next... </tspan><tspan fill="#8e8e8e">flag=</tspan><tspan fill="#a0a0a0">--version </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="273.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">grep</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">line=</tspan><tspan fill="#a0a0a0">grep </tspan><tspan fill="#a0a0a0">(BSD </tspan><tspan fill="#a0a0a0">grep, </tspan><tspan fill="#a0a0a0">GNU </tspan><tspan fill="#a0a0a0">compatible) </tspan><tspan fill="#a0a0a0">2.6.0-FreeBSD </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"2.</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="288">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">6.0-FreeBSD" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="302.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">grep</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">cleaned </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"2.6.0-FreeBSD" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="316.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">grep</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">parsed </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">Version </tspan><tspan fill="#a0a0a0">{ </tspan><tspan fill="#a0a0a0">major: </tspan><tspan fill="#a0a0a0">2, </tspan><tspan fill="#a0a0a0">minor: </tspan><tspan fill="#a0a0a0">6, </tspan><tspan fill="#a0a0a0">patch: </tspan><tspan fill="#a0a0a0">0, </tspan><tspan fill="#a0a0a0">pre: </tspan><tspan fill="#a0a0a0">Prerelea</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="331.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">se("FreeBSD") </tspan><tspan fill="#a0a0a0">} </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="345.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">fd</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">line=</tspan><tspan fill="#a0a0a0">fd </tspan><tspan fill="#a0a0a0">10.3.0 </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"10.3.0" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="360">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">fd</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">cleaned </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"10.3.0" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="374.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">fd</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">parsed </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">Version </tspan><tspan fill="#a0a0a0">{ </tspan><tspan fill="#a0a0a0">major: </tspan><tspan fill="#a0a0a0">10, </tspan><tspan fill="#a0a0a0">minor: </tspan><tspan fill="#a0a0a0">3, </tspan><tspan fill="#a0a0a0">patch: </tspan><tspan fill="#a0a0a0">0 </tspan><tspan fill="#a0a0a0">} </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="388.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">eza</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">line=</tspan><tspan fill="#a0a0a0">v0.23.4 </tspan><tspan fill="#a0a0a0">[+git] </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.23.4" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="403.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">eza</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">cleaned </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.23.4" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="417.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">eza</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">parsed </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">Version </tspan><tspan fill="#a0a0a0">{ </tspan><tspan fill="#a0a0a0">major: </tspan><tspan fill="#a0a0a0">0, </tspan><tspan fill="#a0a0a0">minor: </tspan><tspan fill="#a0a0a0">23, </tspan><tspan fill="#a0a0a0">patch: </tspan><tspan fill="#a0a0a0">4 </tspan><tspan fill="#a0a0a0">} </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="432">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">bat</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">line=</tspan><tspan fill="#a0a0a0">bat </tspan><tspan fill="#a0a0a0">0.26.0 </tspan><tspan fill="#a0a0a0">(c734087) </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.26.0" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="446.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">bat</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">cleaned </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.26.0" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="460.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">bat</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">parsed </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">Version </tspan><tspan fill="#a0a0a0">{ </tspan><tspan fill="#a0a0a0">major: </tspan><tspan fill="#a0a0a0">0, </tspan><tspan fill="#a0a0a0">minor: </tspan><tspan fill="#a0a0a0">26, </tspan><tspan fill="#a0a0a0">patch: </tspan><tspan fill="#a0a0a0">0 </tspan><tspan fill="#a0a0a0">} </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="475.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">btm</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">line=</tspan><tspan fill="#a0a0a0">bottom </tspan><tspan fill="#a0a0a0">0.11.4 </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.11.4" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="489.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">btm</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">cleaned </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.11.4" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="504">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">btm</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">parsed </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">Version </tspan><tspan fill="#a0a0a0">{ </tspan><tspan fill="#a0a0a0">major: </tspan><tspan fill="#a0a0a0">0, </tspan><tspan fill="#a0a0a0">minor: </tspan><tspan fill="#a0a0a0">11, </tspan><tspan fill="#a0a0a0">patch: </tspan><tspan fill="#a0a0a0">4 </tspan><tspan fill="#a0a0a0">} </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="518.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">luajit</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">line=</tspan><tspan fill="#a0a0a0">LuaJIT </tspan><tspan fill="#a0a0a0">2.1.1764270282 </tspan><tspan fill="#a0a0a0">-- </tspan><tspan fill="#a0a0a0">Copyright </tspan><tspan fill="#a0a0a0">(C) </tspan><tspan fill="#a0a0a0">2005-2025 </tspan><tspan fill="#a0a0a0">Mike </tspan><tspan fill="#a0a0a0">P</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="532.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">all. </tspan><tspan fill="#a0a0a0">https://luajit.org/ </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"2.1.1764270282" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="547.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">luajit</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">cleaned </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"2.1.1764270282" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="561.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">luajit</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">parsed </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">Version </tspan><tspan fill="#a0a0a0">{ </tspan><tspan fill="#a0a0a0">major: </tspan><tspan fill="#a0a0a0">2, </tspan><tspan fill="#a0a0a0">minor: </tspan><tspan fill="#a0a0a0">1, </tspan><tspan fill="#a0a0a0">patch: </tspan><tspan fill="#a0a0a0">1764270282 </tspan><tspan fill="#a0a0a0">} </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="576">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#63feda" x="4.2em">INFO</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">needs</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">found </tspan><tspan fill="#8e8e8e">line=</tspan><tspan fill="#a0a0a0">needs </tspan><tspan fill="#a0a0a0">0.7.0 </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.7.0" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="590.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">needs</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">cleaned </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">"0.7.0" </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="604.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">21:03 </tspan><tspan fill="#5f60ff">DEBUG</tspan><tspan fill="#a0a0a0" x="7.2em">[</tspan><tspan fill="#a0a0a0" font-weight="bold">needs</tspan><tspan fill="#a0a0a0">] </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">parsed </tspan><tspan fill="#8e8e8e">version=</tspan><tspan fill="#a0a0a0">Version </tspan><tspan fill="#a0a0a0">{ </tspan><tspan fill="#a0a0a0">major: </tspan><tspan fill="#a0a0a0">0, </tspan><tspan fill="#a0a0a0">minor: </tspan><tspan fill="#a0a0a0">7, </tspan><tspan fill="#a0a0a0">patch: </tspan><tspan fill="#a0a0a0">0 </tspan><tspan fill="#a0a0a0">} </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="619.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" x="1.8em">awk</tspan><tspan fill="#a0a0a0" x="4.2em">? </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="633.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" x="1.8em">bat</tspan><tspan fill="#a0a0a0" x="4.2em">0.26.0 </tspan><tspan fill="#a0a0a0" opacity="0.5">via </tspan><tspan fill="#a0a0a0" opacity="0.5">cargo</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="648">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" x="1.8em">btm</tspan><tspan fill="#a0a0a0" x="4.2em">0.11.4 </tspan><tspan fill="#a0a0a0" opacity="0.5">via </tspan><tspan fill="#a0a0a0" opacity="0.5">cargo</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="662.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" x="1.8em">eza</tspan><tspan fill="#a0a0a0" x="4.2em">0.23.4 </tspan><tspan fill="#a0a0a0" opacity="0.5">via </tspan><tspan fill="#a0a0a0" opacity="0.5">cargo</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="676.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" x="2.4em">fd</tspan><tspan fill="#a0a0a0" x="4.2em">10.3.0 </tspan><tspan fill="#a0a0a0" opacity="0.5">via </tspan><tspan fill="#a0a0a0" opacity="0.5">cargo</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="691.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" x="1.2em">grep</tspan><tspan fill="#a0a0a0" x="4.2em">2.6.0 </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="705.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4">luajit</tspan><tspan fill="#a0a0a0" x="4.2em">2.1.1764270282 </tspan><tspan fill="#a0a0a0" opacity="0.5">via </tspan><tspan fill="#a0a0a0" opacity="0.5">homebrew</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="720">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" x="0.6em">needs</tspan><tspan fill="#a0a0a0" x="4.2em">0.7.0 </tspan><tspan fill="#a0a0a0" opacity="0.5">via </tspan><tspan fill="#a0a0a0" opacity="0.5">cargo</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="734.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="3em">--- </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="748.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#ff8080">idnvus</tspan><tspan fill="#a0a0a0" x="4.2em">not </tspan><tspan fill="#a0a0a0">found </tspan></text>
+</svg>
+</g>
+</svg>
+</svg>
+<rect fill="none" height="805.6" rx="12" ry="12" stroke="#000000" stroke-width="0.5" width="703.2"/>
+<rect fill="none" height="803.6" rx="11" ry="11" stroke="#f0f0f080" stroke-width="0.5" width="701.2" x="1" y="1"/>
+</g>
+<style>
+@font-face {
+	font-family: JetBrains Mono;
+	font-weight: 100 800;
+	font-style: normal;
+	src: url(https://raw.githubusercontent.com/pamburus/fonts/refs/heads/main/JetBrainsMono/fonts/variable/JetBrainsMono%5Bwght%5D.woff2) format('woff2');
+}
+</style>
+</svg>

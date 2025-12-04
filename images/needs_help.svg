@@ -1,0 +1,98 @@
+<svg height="524" width="767.2" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(32,16)">
+<filter filterUnits="userSpaceOnUse" height="532" id="shadow" width="775.2" x="-32" y="-24">
+<feGaussianBlur stdDeviation="12"/>
+</filter>
+<rect fill="#000000c0" filter="url(#shadow)" height="460" rx="12" ry="12" width="703.2" x="4" y="12"/>
+<rect fill="#101010" height="460" rx="12" ry="12" width="703.2"/>
+<clipPath id="header">
+<rect height="28" width="703.2"/>
+</clipPath>
+<rect clip-path="url(#header)" fill="#101010" height="56" rx="12" ry="12" width="703.2"/>
+<line stroke="#000000c0" stroke-width="0.5" x1="0" x2="703.2" y1="28" y2="28"/><text dominant-baseline="central" fill="#b3b3b3" font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" x="351.6" y="14">needs --help</text>
+<g>
+<circle cx="14" cy="14" fill="#ff5f56" r="6" stroke="#ff5f56" stroke-width="0.5"/>
+<circle cx="34" cy="14" fill="#ffbd2e" r="6" stroke="#ffbd2e" stroke-width="0.5"/>
+<circle cx="54" cy="14" fill="#28c941" r="6" stroke="#28c941" stroke-width="0.5"/>
+</g>
+<svg class="terminal" font-family="JetBrains Mono, Fira Code, Source Code Pro, Cascadia Code, Consolas, Menlo, Monaco, DejaVu Sans Mono, monospace, Symbols Nerd Font Mono" font-size="12" height="432" width="703.2" y="28">
+<svg fill="#a0a0a0" x="9.6" y="7.2">
+<g>
+<svg height="417.6" viewBox="0 0 57 34.8" width="684">
+<g stroke-width="0.025"/>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="0">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">Check </tspan><tspan fill="#a0a0a0">if </tspan><tspan fill="#a0a0a0">given </tspan><tspan fill="#a0a0a0">bin(s) </tspan><tspan fill="#a0a0a0">are </tspan><tspan fill="#a0a0a0">available </tspan><tspan fill="#a0a0a0">in </tspan><tspan fill="#a0a0a0">the </tspan><tspan fill="#a0a0a0">PATH </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="28.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">If </tspan><tspan fill="#a0a0a0">no </tspan><tspan fill="#a0a0a0">binaries </tspan><tspan fill="#a0a0a0">are </tspan><tspan fill="#a0a0a0">specified, </tspan><tspan fill="#a0a0a0">it </tspan><tspan fill="#a0a0a0">will </tspan><tspan fill="#a0a0a0">look </tspan><tspan fill="#a0a0a0">for </tspan><tspan fill="#a0a0a0">a </tspan><tspan fill="#a0a0a0">file </tspan><tspan fill="#a0a0a0">named </tspan><tspan fill="#a0a0a0">`needsfile` </tspan><tspan fill="#a0a0a0">or </tspan><tspan fill="#a0a0a0">`.needsfile` </tspan><tspan fill="#a0a0a0">in </tspan><tspan fill="#a0a0a0">the </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="43.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0">current </tspan><tspan fill="#a0a0a0">directory. </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="72">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" font-weight="bold">Usage:</tspan><tspan fill="#a5f2f3" font-weight="bold" x="4.2em">needs</tspan><tspan fill="#a5f2f3" x="7.8em">[OPTIONS]</tspan><tspan fill="#a5f2f3" x="13.8em">[BINS]...</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="100.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" font-weight="bold">Arguments:</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="115.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a5f2f3" x="1.2em">[BINS]...</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="129.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="6em">List </tspan><tspan fill="#a0a0a0">of </tspan><tspan fill="#a0a0a0">binaries </tspan><tspan fill="#a0a0a0">to </tspan><tspan fill="#a0a0a0">check </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="158.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#99ffe4" font-weight="bold">Options:</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="172.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a5f2f3" font-weight="bold" x="1.2em">-q</tspan><tspan fill="#a0a0a0">, </tspan><tspan fill="#a5f2f3" font-weight="bold">--quiet</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="187.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="6em">stay </tspan><tspan fill="#a0a0a0">quiet, </tspan><tspan fill="#a0a0a0">exit </tspan><tspan fill="#a0a0a0">with </tspan><tspan fill="#a0a0a0">0 </tspan><tspan fill="#a0a0a0">or </tspan><tspan fill="#a0a0a0">1 </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="216">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a5f2f3" font-weight="bold" x="1.2em">-v</tspan><tspan fill="#a0a0a0">, </tspan><tspan fill="#a5f2f3" font-weight="bold">--verbosity</tspan><tspan fill="#a5f2f3">...</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="230.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="6em">Verbosity </tspan><tspan fill="#a0a0a0">level </tspan><tspan fill="#a0a0a0">(can </tspan><tspan fill="#a0a0a0">be </tspan><tspan fill="#a0a0a0">repeated, </tspan><tspan fill="#a0a0a0">e.g. </tspan><tspan fill="#a0a0a0">-vvv) </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="259.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a5f2f3" font-weight="bold" x="1.2em">-n</tspan><tspan fill="#a0a0a0">, </tspan><tspan fill="#a5f2f3" font-weight="bold">--no-versions</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="273.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="6em">don't </tspan><tspan fill="#a0a0a0">check </tspan><tspan fill="#a0a0a0">for </tspan><tspan fill="#a0a0a0">versions </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="302.4">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a5f2f3" font-weight="bold" x="1.2em">-f</tspan><tspan fill="#a0a0a0">, </tspan><tspan fill="#a5f2f3" font-weight="bold">--full-versions</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="316.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="6em">show </tspan><tspan fill="#a0a0a0">the </tspan><tspan fill="#a0a0a0">full </tspan><tspan fill="#a0a0a0">version </tspan><tspan fill="#a0a0a0">string </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="345.6">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a5f2f3" font-weight="bold" x="1.2em">-h</tspan><tspan fill="#a0a0a0">, </tspan><tspan fill="#a5f2f3" font-weight="bold">--help</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="360">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="6em">Print </tspan><tspan fill="#a0a0a0">help </tspan><tspan fill="#a0a0a0">(see </tspan><tspan fill="#a0a0a0">a </tspan><tspan fill="#a0a0a0">summary </tspan><tspan fill="#a0a0a0">with </tspan><tspan fill="#a0a0a0">'-h') </tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="388.8">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a5f2f3" font-weight="bold" x="1.2em">-V</tspan><tspan fill="#a0a0a0">, </tspan><tspan fill="#a5f2f3" font-weight="bold">--version</tspan></text>
+</svg>
+<svg height="14.4" overflow="hidden" width="684" y="403.2">
+<text xml:space="preserve" y="0.96em"><tspan fill="#a0a0a0" x="6em">Print </tspan><tspan fill="#a0a0a0">version </tspan></text>
+</svg>
+</g>
+</svg>
+</svg>
+<rect fill="none" height="460" rx="12" ry="12" stroke="#000000" stroke-width="0.5" width="703.2"/>
+<rect fill="none" height="458" rx="11" ry="11" stroke="#f0f0f080" stroke-width="0.5" width="701.2" x="1" y="1"/>
+</g>
+<style>
+@font-face {
+	font-family: JetBrains Mono;
+	font-weight: 100 800;
+	font-style: normal;
+	src: url(https://raw.githubusercontent.com/pamburus/fonts/refs/heads/main/JetBrainsMono/fonts/variable/JetBrainsMono%5Bwght%5D.woff2) format('woff2');
+}
+</style>
+</svg>
