@@ -2,7 +2,7 @@ release_build := "./target/release/needs"
 
 @_default:
     just --list
-    needs gum freeze hr termframe resvg agg
+    needs gum freeze hr termframe resvg agg pkgx
 
 @gif:
     agg demo.cast --font-family "JetBrainsMono Nerd Font Mono" --speed 2 demo.gif
@@ -91,6 +91,14 @@ test-no-versions: build-no-versions
     pkgx -Q needs
     pkgx needs --version
     pkgx needs
+
+
+compare-versions:
+    @gum log -l "info" "Comparing versions..."    
+    cargo run -- --version
+    pkgx needs --version
+    cargo binstall --dry-run needs
+
 
 @freeze-all: freeze-latest freeze-no-versions freeze-help freeze-log
     gum log -l "info" "All images have been generated."
