@@ -17,18 +17,18 @@ release_build := "./target/release/needs"
 
 @test-cases:
     clear
-    cd ./needsfiles/always_present && ./target/release/needs -- -vvvv
+    cd ./needsfiles/always_present && ../../target/release/needs -vvvv
     hr
-    cd ./needsfiles/builtins && ./target/release/needs -- -vvvv
+    cd ./needsfiles/builtins && ../../target/release/needs -vvvv
     hr
-    cd ./needsfiles/collection && ./target/release/needs -- -vvvv
+    cd ./needsfiles/collection && ../../target/release/needs -vvvv
     hr
-    -cd ./needsfiles/empty && ./target/release/needs -- -vvvv
+    -cd ./needsfiles/empty && ../../target/release/needs -vvvv
     hr
-    cd ./needsfiles/never_present && ./target/release/needs -- -vvvv
+    cd ./needsfiles/never_present && ../../target/release/needs -vvvv
     hr
     -mkdir ./needsfiles/non_existent
-    -cd ./needsfiles/non_existent && ./target/release/needs -- -vvvv
+    -cd ./needsfiles/non_existent && ../../target/release/needs -vvvv
 
 test: build
     cargo clippy
