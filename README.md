@@ -38,11 +38,11 @@ Here are [freeze](https://github.com/charmbracelet/freeze)-generated screenshots
 
 > just `needs`
 
-<img src="https://github.com/NQMVD/needs/blob/main/images/needs_latest.png?raw=true" width="480px" alt="needs_latest"/>
+<img src="https://github.com/NQMVD/needs/blob/main/images/needs_latest.png?raw=true" width="720px" alt="needs_latest"/>
 
 > `needs --no-versions` to skip version retrieval
 
-<img src="https://github.com/NQMVD/needs/blob/main/images/needs_no_versions.png?raw=true" width="480px" alt="needs_no_versions"/>
+<img src="https://github.com/NQMVD/needs/blob/main/images/needs_no_versions.png?raw=true" width="720px" alt="needs_no_versions"/>
 
 > `needs -vvv` to see what's going on
 
@@ -67,17 +67,37 @@ For now it will just reside inside of needs, but in the future I'm planning on m
 </h1>
 
 ### Installation
+
+> [!TIP]
+> You can now use `needs` with `pkgx`!  
+> `pkgx needs`  
+> or just try it out without having to install _anything_ (although pkgx is sick and you should use it):  
+
+```bash
+sh <(curl https://pkgx.sh) needs --version
+```
+
+Via crates.io:
+
 ```bash
 cargo install needs
 ```
-or
+
 ```bash
+# if releases keep up this is faster
 cargo binstall -y needs
 ```
-or
+
 ```bash
-# to disable version retrieval completely
+# to disable version retrieval
 cargo install needs --no-default-features
+```
+
+Via github:
+
+```bash
+# always the most uptodate version
+cargo install --git https://github.com/NQMVD/needs.git
 ```
 
 > [!NOTE]

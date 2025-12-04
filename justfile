@@ -88,7 +88,9 @@ test-no-versions: build-no-versions
     cargo install needs
 
 @run-from-pkgx:
+    pkgx -Q needs
     pkgx needs --version
+    pkgx needs
 
 @freeze-all: freeze-latest freeze-no-versions freeze-help freeze-log
     gum log -l "info" "All images have been generated."
