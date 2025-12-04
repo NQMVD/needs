@@ -1,5 +1,5 @@
 <h1>needs</h1>
-<img align="right" src="https://github.com/NQMVD/needs/blob/master/icon.svg?raw=true" height="120px" alt="icon"/>
+<img align="right" src="https://github.com/NQMVD/needs/blob/main/icon.svg?raw=true" height="120px" alt="icon"/>
 
 ![](https://img.shields.io/github/last-commit/NQMVD/needs?&style=for-the-badge&color=b1ffb4&logoColor=D9E0EE&labelColor=292324)
 [![Visitors](https://api.visitorbadge.io/api/combined?path=https%3A%2F%2Fcrates.io%2Fcrates%2Fneeds&label=crates.io%20Visitors&labelColor=%232a2325&countColor=%23263759&style=flat-square&labelStyle=upper)](https://visitorbadge.io/status?path=https%3A%2F%2Fcrates.io%2Fcrates%2Fneeds)
@@ -26,7 +26,7 @@ made with:
 
 ### Showcase
 
-![gif](https://github.com/NQMVD/needs/blob/master/demo.gif?raw=true)
+![gif](https://github.com/NQMVD/needs/blob/main/demo.gif?raw=true)
 
 [asciicast](https://asciinema.org/a/720569)
 
@@ -38,15 +38,15 @@ Here are [freeze](https://github.com/charmbracelet/freeze)-generated screenshots
 
 > just `needs`
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/needs_latest.png?raw=true" width="480px" alt="needs_latest"/>
+<img src="https://github.com/NQMVD/needs/blob/main/images/needs_latest.png?raw=true" width="480px" alt="needs_latest"/>
 
 > `needs --no-versions` to skip version retrieval
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/needs_no_versions.png?raw=true" width="480px" alt="needs_no_versions"/>
+<img src="https://github.com/NQMVD/needs/blob/main/images/needs_no_versions.png?raw=true" width="480px" alt="needs_no_versions"/>
 
 > `needs -vvv` to see what's going on
 
-<img src="https://github.com/NQMVD/needs/blob/master/images/needs_log.png?raw=true" width="720px" alt="needs_log"/>
+<img src="https://github.com/NQMVD/needs/blob/main/images/needs_log.png?raw=true" width="720px" alt="needs_log"/>
 
 This logging output was hand crafted with _(heavy)_ inspiration from [charm/log](https://github.com/charmbracelet/log) building on [env_logger](https://crates.io/crates/env_logger).
 Ironically not because of the env-part of it, but because it feels like the simplest wrapper of std::log and it supports key-value-pairs which were very important to me.
@@ -60,7 +60,7 @@ For now it will just reside inside of needs, but in the future I'm planning on m
 
 ### Usage
 
-![needs_help](https://github.com/NQMVD/needs/blob/master/images/needs_help.png?raw=true)
+![needs_help](https://github.com/NQMVD/needs/blob/main/images/needs_help.png?raw=true)
 
 <h1>
 
