@@ -1,0 +1,5 @@
+WHITESPACE = _{ " " | "\t" }
+COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* }
+
+needsfile = { SOI ~ (binary | NEWLINE)* ~ EOI }
+binary = @{ (ASCII_ALPHANUMERIC | "_" | "-" | ".")+ }

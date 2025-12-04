@@ -35,6 +35,8 @@ once_cell = { version = "1.21.3" }
 semver = "1.0.26"
 miette = { version = "7.6.0", features = ["fancy"] }
 thiserror = "2.0.12"
+pest = "2.7"
+pest_derive = "2.7"
 
 [profile.dev]
 split-debuginfo = "unpacked"

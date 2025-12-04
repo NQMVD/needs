@@ -10,6 +10,7 @@ mod error;
 mod io;
 mod logging;
 mod output;
+mod parser;
 mod versions;
 
 use clap::Parser;
