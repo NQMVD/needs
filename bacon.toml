@@ -51,6 +51,5 @@ background = false
 c = "job:clippy"
 l = "job:run-verbose"
 e = "job:run-eza"
-g = "job:run-grep"
 n = "job:run-no-versions-feature"
 v = "job:clippy-no-versions-feature"
